@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>頎邦(6147) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14;
+  --surface:#131A21;
+  --ink:#E7ECEF;
+  --ink-soft:#9AA7B0;
+  --ink-mute:#6B7680;
+  --border:#232B33;
+  --navy:#17202B;
+  --navy-deep:#0B0F14;
+  --teal:#34D399;
+  --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171;
+  --red-bg:rgba(248,113,113,0.12);
+  --amber:#FBBF24;
+  --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6;
+  --pink-bg:rgba(244,114,182,0.12);
+  --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  line-height:1.7;
+  padding-bottom:6rem;
+}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+.mono{font-family:'Roboto Mono',monospace;}
+
+header{
+  background:var(--navy-deep);
+  color:#F4F1E8;
+  padding:2.5rem 2rem 2rem;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{
+  display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;
+  background:rgba(248,113,113,0.15);color:#FCA5A5;font-size:13px;border:1px solid rgba(248,113,113,0.3);
+}
+
+.stepnav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,15,20,0.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:center;flex-wrap:wrap;
+  padding:.6rem 1rem;gap:.4rem;
+}
+.stepnav a{
+  font-size:13px;padding:.45rem .9rem;border-radius:20px;
+  color:var(--ink-soft);text-decoration:none;border:1px solid transparent;
+  white-space:nowrap;
+}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+
+.step-eyebrow{
+  font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;
+  color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;
+}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+
+.callout{
+  border-left:4px solid var(--teal);
+  background:var(--surface);
+  border-radius:0 10px 10px 0;
+  padding:1rem 1.3rem;
+  margin-bottom:1.5rem;
+  font-size:15px;
+}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;}
+.neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+
+.rule-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:1.2rem 1.4rem;margin-bottom:1rem;
+}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{
+  font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;
+  padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);
+}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--teal-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--teal);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+
+.signal-table td.label{white-space:normal;}
+
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TPEx : 6147</div>
+  <h1>頎邦科技股份有限公司</h1>
+  <div class="sub">CHIPBOND TECHNOLOGY CORP.　個股初步分析報告　生成日期 2026/08/11</div>
+  <div class="alert">⚠ 2026/7/23 遭檢調搜索,董事長兼執行長等7人交保,詳見第2步</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ 法說會深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 本益比預估</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+
+  <div class="callout">
+    <b>總分 64.7%,屬「良好」等級,可繼續往下分析。</b>規則五(現金流品質)近10年零失誤,表現極佳;但規則一、三、六都指向同一疑慮——2022年高點後,近三年(2023-2025)動能連續轉弱。
+  </div>
+
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2016</td><td class="pos">40.7</td><td class="pos">+21.4</td><td class="neg">-58.1</td><td>26.7</td><td>61.1</td></tr>
+      <tr><td class="label">2017</td><td class="pos">48.6</td><td class="neg">-26.8</td><td class="neg">-21.9</td><td>22.7</td><td>60.7</td></tr>
+      <tr><td class="label">2018</td><td class="pos">61.3</td><td class="neg">-47.7</td><td class="neg">-13.8</td><td>35.7</td><td>60.6</td></tr>
+      <tr><td class="label">2019</td><td class="peak">85.4</td><td class="neg">-52.1</td><td class="neg">-22.6</td><td>52.5</td><td>71.4</td></tr>
+      <tr><td class="label">2020</td><td class="pos">61.7</td><td class="trough">-64.4</td><td class="neg">-27.3</td><td>44.5</td><td class="trough">41.4</td></tr>
+      <tr><td class="label">2021</td><td class="pos">79.5</td><td class="neg">-49.1</td><td class="neg">-16.1</td><td>74.3</td><td>55.7</td></tr>
+      <tr><td class="label">2022</td><td class="peak">104</td><td class="neg">-32.1</td><td class="trough">-69.5</td><td>76.6</td><td>58.6</td></tr>
+      <tr><td class="label">2023</td><td class="pos">66.2</td><td class="pos">-6.69</td><td class="neg">-61.8</td><td>47.6</td><td>56.2</td></tr>
+      <tr><td class="label">2024</td><td class="pos">53.3</td><td class="pos">+13.8</td><td class="neg">-37.1</td><td>47.6</td><td class="peak">86.3</td></tr>
+      <tr><td class="label">2025</td><td class="trough">35.5</td><td class="neg">-35.9</td><td class="neg">-15.5</td><td>32.6</td><td>68.3</td></tr>
+      <tr><td class="label">26Q2(單季,僅供參考)</td><td class="neg">2.73</td><td class="neg">-15.6</td><td class="pos">+4.03</td><td>18.6</td><td>60.8</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。2011-2015年因年代較久僅供參考不列入計分。</p>
+
+  <div class="rule-card">
+    <h3>規則一・A 逐年成長趨勢 <span class="rule-score mid">48 / 100</span></h3>
+    <p>A從2016的40.7持續攀升,2022達到近10年高點104。但近兩年出現明顯轉弱:2024回落至53.3(較2022高點下滑近半),2025進一步降至35.5,26Q2單季僅2.73。整體屬「先強後轉弱」型,近期動能是主要疑慮。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則二・B 投資紀律評估 <span class="rule-score mid">60 / 100(暫定)</span></h3>
+    <p>B多數年度為負值,金額落在-6.69至-64.4之間波動較大,2020年投資金額(-64.4)甚至超過當年A(61.7)本身。2016、2024出現罕見正值,增添解讀複雜度。整體投資力道不算穩健節制,屬於「時緊時鬆」型,細項未取得前無法確認資本支出或理財性質。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則三・B 投資效益分析(對照隔年 A) <span class="rule-score mid">52 / 100</span></h3>
+    <table style="margin:0.6rem 0 0;">
+      <thead><tr><th>投資年度(B)</th><th>對應 A</th><th>效益</th></tr></thead>
+      <tbody>
+        <tr><td>2019 B=-52.1</td><td class="neg">2020 A=61.7(回落)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2020 B=-64.4(近年最大)</td><td class="pos">2021 A=79.5(回升)</td><td>轉強 ✓</td></tr>
+        <tr><td>2021 B=-49.1</td><td class="pos">2022 A=104(大增)</td><td>轉強 ✓</td></tr>
+        <tr><td>2022 B=-32.1</td><td class="neg">2023 A=66.2(回落)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2023 B=-6.69(投資縮手)</td><td class="neg">2024 A=53.3(續降)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2024 B=+13.8(處分)</td><td class="neg">2025 A=35.5(大幅下滑)</td><td>未轉強 ✗</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.6rem;">投資轉化效果約一半有效、一半無效,且最近三個年度(2023-2025)投資效益連續未能反映在隔年A的成長上。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則四・C 融資活動合理性 <span class="rule-score high">75 / 100(暫定)</span></h3>
+    <p>2016-2025全年度A皆為正值,無借錢投資的年度疊加警訊。26Q2單季A僅2.73(偏低但仍為正)、C轉為+4.03(近年少見的融資淨流入),組合上不構成規則四定義的最高警戒訊號,但顯示公司近期現金流入力道已弱到需要外部資金小額挹注的邊緣。C多數年度為較大負值,推測與股利發放相關,但細項未取得前無法完全確認。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則五・A &gt; D 現金流品質(嚴格二分法) <span class="rule-score high">95 / 100</span></h3>
+    <p><b>10年全數通過,100%!</b>這是六項規則中表現最亮眼的一項——帳面獲利每一年都確實轉化為更多的實際現金流入,即便近兩年獲利與現金流同步下滑,現金流品質本身沒有惡化,獲利的「含金量」始終維持得相當扎實。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則六・E 期末現金餘額穩定性 <span class="rule-score mid">58 / 100</span></h3>
+    <p>E波動不小:2019高點71.4,2020驟降至41.4(-42%,近年最大單年跌幅),之後緩步回升,2024來到近10年高點86.3,但2025又回落至68.3(-20.9%),26Q2續降至60.8。長期呈現「上沖下洗」而非穩定成長,近期高點後同樣出現連續回落的訊號。</p>
+  </div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">48</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">60</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">52</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">75</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">95</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">58</div></div>
+  </div>
+  <div class="total-score">
+    <div class="v">64.7%</div>
+    <div class="l">六項平均總分・良好等級・可繼續往下分析</div>
+  </div>
+  <p class="snap-note">規則二、四目前僅依總額判斷,建議提供投資/融資活動細項截圖以校正評分。</p>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+
+  <div class="callout">
+    股價 <b>161.50元</b>(2026/8/11收盤,+4.87%),本益比約 <b>47.09倍</b>,評價明顯偏高;股價自6月初313.5元歷史高點已重挫近腰斬。
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric"><div class="l">收盤價(8/11)</div><div class="v">161.50</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">47.09</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">3.43</div></div>
+    <div class="metric"><div class="l">當季EPS(Q2)</div><div class="v">1.28</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">78.58</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">2.05</div></div>
+    <div class="metric"><div class="l">殖利率</div><div class="v">1.82%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">313.5 / 50.2</div></div>
+  </div>
+  <p class="snap-note">資料來源:<a href="https://www.cnyes.com/twstock/6147" target="_blank">鉅亨網-頎邦總覽</a>(查詢時間2026/8/11)</p>
+
+  <div class="callout danger">
+    <b>⚠ 重大事件:董事長兼執行長遭檢調搜索並交保</b><br>
+    新竹地檢署偵辦頎邦吳姓董事等7人涉嫌違反證券交易法等案件,涉嫌於2016年至2019年間以違背職務之方式侵占公司資產。檢察官2026/7/23盤後指揮新竹縣調查站,持法院核發之搜索票,搜索頎邦公司、被告住處等相關處所共5處,扣得手機、筆記型電腦、相關會議資料及存摺等物。複訊後認為犯罪嫌疑重大但無羈押必要,吳姓董事兼執行長以3000萬元交保,羅姓副總以2000萬元交保,其餘5名被告以30萬至100萬元不等交保。公司公告表示全力配合調查,營運正常,對財務業務無重大影響;股價於2026/7/24開盤即跳空跌停鎖死於158元。
+    <p class="snap-note" style="margin-top:.5rem;">資料來源:<a href="https://today.line.me/tw/v3/article/BE6Gllw" target="_blank">太報</a>、<a href="https://www.ftnn.com.tw/news/564002" target="_blank">FTNN新聞網</a>、<a href="https://finance.ettoday.net/news/3206898" target="_blank">ETtoday新聞雲</a></p>
+    <p style="margin-top:.5rem;">涉案期間(2016-2019年)剛好落在第一步現金流分析所檢視的年度區間內,雖目前偵辦的是「侵占公司資產」而非直接指向現金流量表造假,但這類治理疑慮通常會讓市場對財報數字的信任度打折扣。</p>
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">營收與股利</h3>
+  <p>2026年6月營收22.88億元,年增27.06%。5月營收21.58億元,月減1.25%,年增19.1%;5月累計營收100.99億元,累計年增15.89%。2025年全年營收214.54億元。2026年第1季EPS為0.59元,季減47%,年減34%;2025全年EPS為3.74元。最新除權息日2026/6/17,發放現金股利2.8元,現金殖利率1.23%;近五年平均現金股利5.12元,平均現金殖利率7.03%。</p>
+  <p class="snap-note">資料來源:<a href="https://winvest.tw/Stock/Symbol/Comment/6147" target="_blank">Win投資-頎邦</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">法說會重點(2026Q1/Q2,搜索事件發生前)</h3>
+  <p>頎邦於法說會中指出,原先預期因記憶體價格高漲擠壓消費性電子產品成本,導致客戶訂單調整與下修;然而部分主要客戶進行更積極的庫存建置,營收表現優於預期。公司對2026下半年持相對不樂觀的看法,主要擔憂記憶體成本(DRAM、SSD)已佔據手機與筆記型電腦總成本比重過高。</p>
+  <p class="snap-note">資料來源:<a href="https://blog.fugle.tw/post/earnings-call-6147-2026-06-24" target="_blank">富果直送-頎邦法說會重點備忘錄</a></p>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>法說會資料深入討論:矽光子業務對估值的意義</h2>
+
+  <div class="callout">
+    矽光子(Silicon Photonics)封裝業務目前僅佔2026年總營收約4-6%,但法人預估2027年將攀升至10-12%、2028年達20-22%,這是外資敢喊出210-336元天價目標價的核心邏輯——市場在提前為2-3年後的業務結構買單。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">矽光子業務進展</h3>
+  <p>頎邦自2025年第二季起陸續接獲超過10家矽光設計公司新客戶,累計開案逾30件,其中5-6項產品已透過認證並進入量產,主要涵蓋TIA、PD、Driver與Modulator等關鍵元件,目前以八吋金凸塊服務為主。管理層預估矽光業務在2026年將貢獻顯著營收佔比,且明後年成長動能強勁。頎邦透過金凸塊技術有效解決光收發模組升級至200G的高頻訊號衰減痛點。產能規劃上,未來擴廠將優先聚焦12吋產能,策略上藉由引導驅動IC轉向12吋,釋出既有8吋產能全力支援矽光客戶需求;並正佈局測試與切割的一站式服務,預計2027年陸續推動。</p>
+  <p class="snap-note">資料來源:<a href="https://blog.fugle.tw/post/earnings-call-6147-2026-06-24" target="_blank">富果直送法說會備忘錄</a>、<a href="https://vocus.cc/article/6a3c1981fd8978000154b9a5" target="_blank">Vocus法說會摘要</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">傳統業務與2025年回顧</h3>
+  <p>為反映過去三年累積的通膨與生產成本,公司已於2026年第二季全面調漲報價且獲客戶接受,預估今年驅動IC總營收仍將持平。RF射頻方案因美系大客戶自行吸收記憶體成本,出貨量未受影響;RFID電子標籤維持每年30%的穩定增長。2025年對頎邦而言是營運平穩的一年,整體營收與前一年相當,產能利用率全年維持在65%至70%之間;公司面臨美元走貶及金價上漲挑戰,導致毛利率略為下滑,但非驅動IC業務營收佔比已成長至超過30%,成功抵銷部分外部環境壓力。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">法人評等與目標價(搜索事件發生前)</h3>
+  <p>凱基投顧預估光通訊晶片金凸塊業務占頎邦2026年總營收約4%至6%比重,2027、2028年分別攀升至10%至12%與20%至22%,給予280元目標價。花旗環球證券將投資評等從「賣出」跳升到「買進」,推測合理股價翻揚至210元,指出頎邦憑藉金凸塊產能領先優勢,正切入矽光子市場的線性可插拔光學模組(LPO)開發,LPO具備較高毛利率特性,將成為推動2027年獲利成長的重要動能。美系券商基於2027年30倍本益比評價,給予2026至2028年每股稅後盈餘5.2元、7元、8.2元的預估。</p>
+  <p class="snap-note">資料來源:<a href="https://www.ftnn.com.tw/news/548302" target="_blank">FTNN新聞網</a>、<a href="https://www.ctee.com.tw/news/20260505700193-439901" target="_blank">工商時報</a></p>
+
+  <div class="callout warn">
+    <b>⚠ 評價邏輯的核心風險</b><br>
+    這套估值邏輯本質是「用明天的獲利買今天的股票」——先假設2027年EPS能到6.97-7元,再套用30倍本益比,回推現在合理該值210-280元。目前實際數字離這個樂觀假設還有落差:2026年Q1~Q2累計EPS為1.87元,較去年同期衰退12.33%,若單純乘以2估算全年約落在3.7元,離外資預估的5.19元有段距離,代表下半年EPS需要比上半年顯著加速成長才行得通。<br><br>
+    此外,上述樂觀報告大多發布於2026年5月,在7/23檢調搜索事件之前,目前尚未看到法人針對搜索事件是否影響矽光子業務推進進度、客戶信心、經營團隊穩定性提出更新評估。公司在法說會中提到「預計自2027年起,為擴充矽光子業務所需的測試與切割產能,資本支出與折舊費用將重新增加」,但目前營業現金流(A)正處於2022年高點後連續三年下滑的趨勢,若矽光子放量速度跟不上資本支出擴張速度,可能重演規則四中觀察到的「本業造血不足、需外部資金支應」疑慮。
+  </div>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近13個月)</h2>
+
+  <div class="callout">
+    月營收自2026年4月起明顯加速,連續4個月年增率站上19%以上,<b>7月創單月新高25.23億元、年增率39.18%</b>,加速軌跡與矽光子業務放量時間點高度吻合。相對地,2025年下半年(7-11月)則呈現年增率貼近0甚至轉負的低迷狀態。
+  </div>
+
+  <div class="chart-wrap">
+    <svg viewBox="0 0 950 380" style="width:100%;height:auto;" role="img" aria-label="頎邦近13個月月營收長條圖">
+      <line x1="60" y1="320" x2="930" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="240" x2="930" y2="240" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="160" x2="930" y2="160" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="80"  x2="930" y2="80"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="244" text-anchor="end" font-size="11" fill="#8B93A0">10</text>
+      <text x="50" y="164" text-anchor="end" font-size="11" fill="#8B93A0">20</text>
+      <text x="50" y="84"  text-anchor="end" font-size="11" fill="#8B93A0">30</text>
+
+      <rect x="73"  y="174.96" width="48" height="145.04" rx="3" fill="#378ADD"/>
+      <text x="97"  y="169" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">18.1</text>
+      <text x="97"  y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+
+      <rect x="139" y="174.08" width="48" height="145.92" rx="3" fill="#378ADD"/>
+      <text x="163" y="168" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">18.2</text>
+      <text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+
+      <rect x="205" y="167.52" width="48" height="152.48" rx="3" fill="#378ADD"/>
+      <text x="229" y="161.5" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">19.1</text>
+      <text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+
+      <rect x="271" y="173.44" width="48" height="146.56" rx="3" fill="#378ADD"/>
+      <text x="295" y="167.5" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">18.3</text>
+      <text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+
+      <rect x="337" y="178.40" width="48" height="141.60" rx="3" fill="#378ADD"/>
+      <text x="361" y="172.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">17.7</text>
+      <text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/11</text>
+
+      <rect x="403" y="176.56" width="48" height="143.44" rx="3" fill="#378ADD"/>
+      <text x="427" y="170.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">17.9</text>
+      <text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+
+      <rect x="469" y="163.04" width="48" height="156.96" rx="3" fill="#378ADD"/>
+      <text x="493" y="157" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">19.6</text>
+      <text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+
+      <rect x="535" y="179.28" width="48" height="140.72" rx="3" fill="#D4537E"/>
+      <text x="559" y="173.3" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">17.6</text>
+      <text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+
+      <rect x="601" y="157.20" width="48" height="162.80" rx="3" fill="#378ADD"/>
+      <text x="625" y="151.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">20.4</text>
+      <text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+
+      <rect x="667" y="145.20" width="48" height="174.80" rx="3" fill="#378ADD"/>
+      <text x="691" y="139.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">21.9</text>
+      <text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+
+      <rect x="733" y="147.36" width="48" height="172.64" rx="3" fill="#378ADD"/>
+      <text x="757" y="141.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">21.6</text>
+      <text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/05</text>
+
+      <rect x="799" y="136.96" width="48" height="183.04" rx="3" fill="#378ADD"/>
+      <text x="823" y="131.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">22.9</text>
+      <text x="823" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/06</text>
+
+      <rect x="865" y="118.16" width="48" height="201.84" rx="3" fill="#EDA100"/>
+      <text x="889" y="111" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">25.2</text>
+      <text x="889" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">26/07</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近13期新高　粉色=近13期低點</div>
+  </div>
+
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th><th>26/06</th><th>26/07</th></tr></thead>
+    <tbody>
+      <tr><td class="label">年增%</td><td>+0.7%</td><td>+0.6%</td><td>+4.5%</td><td>-3.9%</td><td class="trough">-3.4%</td><td>+1.3%</td><td>+19.3%</td><td>+5.2%</td><td>+11.5%</td><td>+24.2%</td><td>+19.1%</td><td>+27.1%</td><td class="peak">+39.2%</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:<a href="https://tw.stock.yahoo.com/quote/6147/revenue" target="_blank">Yahoo股市-頎邦營收表</a>、<a href="https://www.cmoney.tw/forum/article/180653415" target="_blank">CMoney營收速報</a>(查詢時間2026/8/11)</p>
+
+  <p>營收動能呈現清楚的兩階段轉折:2025年下半年(7-11月)近乎停滯甚至衰退,11月一度年減3.36%,是全年低點;進入2026年後,年增率呈現逐月墊高的加速曲線,4月起再度加速到24%以上,最終7月衝上39.18%的新高。這個轉折時間點與法說會中管理層的說法吻合——2025年下半年是矽光子業務的客戶開發期,尚未反映在營收數字上;進入2026年後產品陸續通過認證並量產,才開始貢獻實質營收。不過搜索事件發生在7/23,若對客戶信心或出貨排程造成影響,理論上要到8月營收(約9月初公布)才會開始反映,目前7月的強勁數字尚未經過這個考驗。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>前瞻本益比 / EPS 預估</h2>
+
+  <div class="callout">
+    FactSet最新調查(6位分析師)顯示目標價中位數上修至 <b>227.5元</b>,對應現價(161.5元)有約41%的潛在漲幅空間;但法人估值分歧程度是本次分析中最大的一次——最高估值340元與最低估值171元之間差距近2倍。
+  </div>
+
+  <table>
+    <thead><tr><th>預估來源</th><th>2026年EPS</th><th>2027年EPS</th><th>2028年EPS</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">花旗環球(2026/5)</td><td>-</td><td>-</td><td>-</td><td>210元</td></tr>
+      <tr><td class="label">瑞銀證券(2026/5)</td><td>-</td><td>-</td><td>-</td><td>230元</td></tr>
+      <tr><td class="label">凱基投顧(2026/5)</td><td>-</td><td>-</td><td>-</td><td>280元</td></tr>
+      <tr><td class="label">美系券商(2026/5)</td><td>5.2元</td><td>7.0元</td><td>8.2元</td><td>基於2027年30倍本益比</td></tr>
+      <tr><td class="label">券商上修(2026/6)</td><td>-</td><td>8.2元</td><td>11.0元</td><td>336元</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:<a href="https://www.cmoney.tw/forum/article/179897316" target="_blank">股市爆料同學會</a>、<a href="https://www.ctee.com.tw/news/20260609701474-430201" target="_blank">工商時報</a></p>
+
+  <p>2026年6月的產業調查顯示,外資券商上修800G以上光收發模組出貨量,年均成長率由77%調高至99%,並於後年達到2.35億顆;明年除金凸塊服務外,還有切割和測試附加服務,另有新客戶正在認證中,並正與聯電合作開發TFLN材質(下一代每通道400G高速解決方案)。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">FactSet最新共識(6位分析師)</h3>
+  <p>根據FactSet最新調查,共6位分析師對頎邦提出目標價估值:中位數由217.5元上修至227.5元,調升幅度4.6%,其中最高估值340元,最低估值171元。</p>
+  <p class="snap-note">資料來源:<a href="https://news.cnyes.com/news/id/6553532" target="_blank">鉅亨速報</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">前瞻本益比(現在貴不貴)</h3>
+  <table>
+    <thead><tr><th>基準</th><th>預估EPS(區間中值)</th><th>前瞻本益比(現價161.5元÷預估EPS)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年</td><td>約5.2元</td><td><b>31.1倍</b></td></tr>
+      <tr><td class="label">2027年</td><td>約7.0-8.2元</td><td><b>19.7-23.1倍</b></td></tr>
+      <tr><td class="label">2028年</td><td>約8.2-11.0元</td><td><b>14.7-19.7倍</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">目標本益比法試算</h3>
+  <p style="font-size:14px;color:var(--ink-soft);">以2027年估值區間中值約7.5元為基準,試算3組假設倍數情境:</p>
+  <table>
+    <thead><tr><th>假設本益比</th><th>目標價(7.5元 × 倍數)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">20倍(保守)</td><td>150元</td></tr>
+      <tr><td class="label">25倍(中性)</td><td>187.5元</td></tr>
+      <tr><td class="label">30倍(樂觀)</td><td>225元</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <b>不確定性揭露(本次特別重要)</b><br>
+    這次的評價分歧程度是六步驟分析中最極端的一次。多套EPS預估本身差異極大,2027年EPS估值從7.0元到8.2元、2028年從8.2元到11元,反映矽光子放量速度的預估本身充滿高度不確定性。FactSet目標價中位數227.5元的報告時間點大約落在7月底,理論上已在搜索事件(7/23)之後,但是否已充分反映公司治理疑慮對客戶信心的潛在衝擊尚不明確。340元最高估值與171元最低估值之間近2倍的落差,顯示市場對「轉型故事能否兌現」的看法非常兩極。建議將227.5元(FactSet中位數)或187.5元(25倍中性情境)視為相對穩健的參考基準,340元屬樂觀情境上緣,而下檔的171元也不能忽略。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+
+  <div class="callout warn">
+    <b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。
+  </div>
+
+  <div class="callout">
+    <b>核心切入點</b>:頎邦這次的六步驟分析呈現六支股票中風險最集中、也最兩極化的組合——現金流體質尚可(64.7%)但近三年動能明確轉弱、極具想像空間的矽光子轉型故事、以及一起尚未完全消化的公司治理疑慮。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>不會現在進場,會選擇觀望。有利因素確實存在:矽光子業務放量的跡象已開始反映在營收數字上(7月年增39.2%創新高),法說會的技術邏輯(200G訊號衰減需要金凸塊解決)也站得住腳。但風險因素同樣顯著且尚未釐清:搜索事件涉及「侵占公司資產」,這類治理疑慮往往不是立即反映在財報數字上,而是反映在客戶信心與長期訂單能見度上,尤其頎邦正處在需要說服新客戶持續加碼投入矽光子領域的關鍵階段。法人估值分歧達到六次分析中最極端的程度(171元到340元,近2倍差距),通常代表市場對「故事能否兌現」缺乏共識,貿然進場承擔的是雙向風險。目前股價161.5元已反映不少矽光子樂觀預期(前瞻本益比31倍),同時又低於FactSet共識中位數227.5元——這種「便宜但沒人敢確定」的狀態,通常需要再多一兩季的財報與客戶動態驗證。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向部分減碼、保留觀察部位,而非全部出清或無條件續抱。矽光子業務的成長軌跡是真實的,若因單一治理事件全部出清,可能錯過轉型故事真正兌現的機會。但搜索事件涉及的期間(2016-2019年)橫跨公司過去財報數字的產生年度,這件事本身就足以構成先降低部位、等待更多資訊的理由——尤其若8月營收出現不尋常下滑,或有更多法人針對此事件明確調整評等,應視為進一步減碼訊號。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號(尚未發生,用於未來驗證)</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">8月營收是否延續7月39.2%的加速趨勢,或明顯回落</td><td>2026年9月初</td><td class="label">若明顯回落,可能反映搜索事件已開始影響客戶下單意願或出貨排程</td></tr>
+      <tr><td class="label">檢調偵辦進度(是否起訴、是否有更多高層涉案)</td><td>無固定日期</td><td class="label">若案情擴大或起訴書內容涉及財報造假,應視為重大警訊,現金流分析可信度需重新檢視</td></tr>
+      <tr><td class="label">是否有法人針對搜索事件單獨發布評論或調整評等</td><td>事件後1-2個月內</td><td class="label">若多家法人下修評等或目標價,代表市場已開始正式定價此風險</td></tr>
+      <tr><td class="label">2026Q3財報中營業現金流(A)是否止跌回升</td><td>2026年11月中旬</td><td class="label">呼應規則一、六的疑慮,若A能重返成長軌道,有助緩解現金流體質疑慮</td></tr>
+      <tr><td class="label">矽光子業務營收占比是否如期達到2026年4-6%的預估區間</td><td>2027年初(年報公布時)</td><td class="label">若實際占比明顯低於預估,代表轉型故事兌現速度不如法人樂觀假設</td></tr>
+    </tbody>
+  </table>
+  <p>這五項訊號中,最優先觀察的是前兩項——8月營收與檢調偵辦進度,因為這兩者最可能在短期內(1-2個月)提供關鍵資訊,決定這次治理事件究竟是一次性衝擊、公司體質不受影響,還是反映了更深層的問題。在這兩點明朗化之前,保持謹慎觀望的立場會比急於進場或急於出清更為穩健。</p>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-11　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = link.getAttribute('href').substring(1);
+      var target = document.getElementById(id);
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+
+  var sections = links.map(function(link){
+    return document.getElementById(link.getAttribute('href').substring(1));
+  }).filter(Boolean);
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
