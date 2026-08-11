@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>錼創科技-KY(6854) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14;
+  --surface:#131A21;
+  --ink:#E7ECEF;
+  --ink-soft:#9AA7B0;
+  --ink-mute:#6B7680;
+  --border:#232B33;
+  --navy:#17202B;
+  --navy-deep:#0B0F14;
+  --teal:#34D399;
+  --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171;
+  --red-bg:rgba(248,113,113,0.12);
+  --amber:#FBBF24;
+  --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6;
+  --pink-bg:rgba(244,114,182,0.12);
+  --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  line-height:1.7;
+  padding-bottom:6rem;
+}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+.mono{font-family:'Roboto Mono',monospace;}
+
+header{
+  background:var(--navy-deep);
+  color:#F4F1E8;
+  padding:2.5rem 2rem 2rem;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{
+  display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;
+  background:rgba(248,113,113,0.15);color:#FCA5A5;font-size:13px;border:1px solid rgba(248,113,113,0.3);
+}
+
+.stepnav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,15,20,0.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:center;flex-wrap:wrap;
+  padding:.6rem 1rem;gap:.4rem;
+}
+.stepnav a{
+  font-size:13px;padding:.45rem .9rem;border-radius:20px;
+  color:var(--ink-soft);text-decoration:none;border:1px solid transparent;
+  white-space:nowrap;
+}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+
+.step-eyebrow{
+  font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;
+  color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;
+}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+
+.callout{
+  border-left:4px solid var(--teal);
+  background:var(--surface);
+  border-radius:0 10px 10px 0;
+  padding:1rem 1.3rem;
+  margin-bottom:1.5rem;
+  font-size:15px;
+}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;}
+.neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+
+.rule-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:1.2rem 1.4rem;margin-bottom:1rem;
+}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{
+  font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;
+  padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);
+}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--red-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--red);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+
+.signal-table td.label{white-space:normal;}
+
+.compare-table td{font-size:13px;}
+
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TWSE : 6854</div>
+  <h1>錼創科技-KY創</h1>
+  <div class="sub">PLAYNITRIDE INC.　個股初步分析報告　生成日期 2026/08/11</div>
+  <div class="alert">⚠ 現金流盲測分數39.2%,六次分析中最低;公司目前處於虧損狀態,估值方法與獲利公司不同</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ CPO業務深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 估值分析</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+
+  <div class="callout danger">
+    <b>總分 39.2%,六次分析中最低分。</b>公司目前仍處於虧損階段,稅前淨利連續多年為負,現金流體質明顯偏弱。2023年出現「內外皆無現金活水」的最嚴重訊號,2025年鉅額募資26.4億元讓現金餘額大幅回升,但也代表體質高度仰賴資本市場支持。
+  </div>
+
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2020</td><td class="neg">-5.59</td><td class="neg">-3.36</td><td class="pos">+16</td><td>-14.9</td><td>13.5</td></tr>
+      <tr><td class="label">2021</td><td class="neg">-6.05</td><td class="neg">-2.32</td><td class="pos">+10.6</td><td>-12.2</td><td>15.6</td></tr>
+      <tr><td class="label">2022</td><td class="neg">-2.02</td><td class="neg">-1.59</td><td class="pos">+6.11</td><td>-5.65</td><td>17.9</td></tr>
+      <tr><td class="label">2023</td><td class="neg">-5.51</td><td class="neg">-6.21</td><td class="trough">-0.46</td><td>-5.13</td><td class="trough">5.75</td></tr>
+      <tr><td class="label">2024</td><td class="neg">-0.34</td><td class="pos">+1.49</td><td class="pos">+0.74</td><td>0.6</td><td>8.06</td></tr>
+      <tr><td class="label">2025</td><td class="neg">-6.93</td><td class="neg">-5.57</td><td class="peak">+26.4</td><td>-1.17</td><td class="peak">22.1</td></tr>
+      <tr><td class="label">26Q1(單季,僅供參考)</td><td class="pos">1.36</td><td class="neg">-4.33</td><td class="pos">+4.59</td><td>-2.3</td><td>23.9</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。</p>
+
+  <div class="rule-card">
+    <h3>規則一・A 逐年成長趨勢 <span class="rule-score low">20 / 100</span></h3>
+    <p>A從2020到2025持續維持負值,完全沒有轉正的年度。2024年一度收斂到接近打平(-0.34),看似有改善跡象,但2025年卻惡化到-6.93,是六年中現金流出最嚴重的一年,反而比公司剛上市初期還要糟。整體看不到穩定改善的軌跡,屬於「反覆虧損、看不到收斂終點」型。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則二・B 投資紀律評估 <span class="rule-score mid">55 / 100(暫定)</span></h3>
+    <p>B多數年度維持在-1.59至-6.21之間的小額投資,規模不算誇張。2024年出現罕見正值(+1.49,可能是資產處分),打斷了原本持續投資的節奏,增添解讀複雜度。整體屬於「持續但規模有限」的投資型態,細項未取得前無法確認資本支出性質。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則三・B 投資效益分析(對照隔年 A) <span class="rule-score mid">40 / 100</span></h3>
+    <table style="margin:0.6rem 0 0;">
+      <thead><tr><th>投資年度(B)</th><th>對應 A</th><th>效益</th></tr></thead>
+      <tbody>
+        <tr><td>2020 B=-3.36</td><td class="neg">2021 A=-6.05(惡化)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2021 B=-2.32</td><td class="pos">2022 A=-2.02(收斂)</td><td>轉強 ✓</td></tr>
+        <tr><td>2022 B=-1.59</td><td class="neg">2023 A=-5.51(惡化)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2023 B=-6.21(投資最大)</td><td class="pos">2024 A=-0.34(顯著收斂)</td><td>轉強 ✓</td></tr>
+        <tr><td>2024 B=+1.49(處分)</td><td class="neg">2025 A=-6.93(大幅惡化)</td><td>未轉強 ✗</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.6rem;">投資轉化效果好壞參半,2/5成功,且最近一次(2024→2025)出現最劇烈的反轉惡化,近期趨勢並不理想。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則四・C 融資活動合理性 <span class="rule-score low">25 / 100</span></h3>
+    <p>檢查「A負值+C正值」最高警戒組合:2020、2021、2022、2025共4個年度觸發,顯示公司持續仰賴外部融資支應營運虧損。但2023年出現比這個警戒組合更嚴重的訊號——當年A為-5.51、C也同時轉負為-0.46,代表公司既沒有本業造血能力,當年也沒有拿到外部資金挹注,只能動用既有現金儲備度過難關,期末現金餘額因此從17.9億驟降至5.75億(單年蒸發近68%)。2025年融資活動淨流入高達26.4億元,推測是大規模募資,才讓現金餘額大幅回升,說明公司體質高度仰賴資本市場的持續支持。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則五・A &gt; D 現金流品質(嚴格二分法) <span class="rule-score mid">45 / 100</span></h3>
+    <p>6年中3年通過,50%。近三年(2023-2025)連續不通過,尤其2025年缺口最為懸殊——帳面稅前虧損僅1.17億元,但實際現金流出卻高達6.93億元,兩者落差近6倍,反映帳面數字與現金實況嚴重脫節。2024年雖然帳面首度轉盈(0.6億),但現金流依然是負的,顯示這個「轉盈」可能來自業外收益或會計調整,而非本業真正開始賺錢。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則六・E 期末現金餘額穩定性 <span class="rule-score mid">50 / 100</span></h3>
+    <p>E從2020到2022穩定成長(13.5→15.6→17.9),但2023年出現六年來最劇烈的單年崩落(17.9→5.75,-68%),2024小幅回升至8.06,2025靠大規模募資跳升至22.1,26Q1續維持在23.9的水準。整體呈現「先穩、中間崩落、後靠募資回穩」的不規則軌跡,並非依靠本業自然累積的成長型態。</p>
+  </div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">20</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">55</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">40</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">25</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">45</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">50</div></div>
+  </div>
+  <div class="total-score">
+    <div class="v">39.2%</div>
+    <div class="l">六項平均總分・六次分析中最低・使用者選擇繼續分析</div>
+  </div>
+  <p class="snap-note">錼創目前是一家仍處於虧損階段的Micro LED技術公司,對這類早期成長型科技公司而言,持續燒錢、仰賴資本市場募資是相對常見的階段性現象,但2023年「內外皆無現金活水」以及2025年帳面虧損與現金流出落差高達6倍的現象,都是需要嚴肅看待的風險訊號。</p>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+
+  <div class="callout">
+    股價 <b>93.70元</b>(2026/8/11收盤,-0.53%),本益比因虧損無法計算;股價自52週高點197.50元已重挫逾52%,目前貼近52週低點82元。公司積極轉向Micro LED跨入光通訊/CPO應用。
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric"><div class="l">收盤價(8/11)</div><div class="v">93.70</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">--</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">-2.69</div></div>
+    <div class="metric"><div class="l">當季EPS</div><div class="v">-2.14</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">18.22</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">5.14</div></div>
+    <div class="metric"><div class="l">毛利率</div><div class="v">-27.03%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">197.5 / 82.0</div></div>
+  </div>
+  <p class="snap-note">資料來源:<a href="https://www.cnyes.com/twstock/6854" target="_blank">鉅亨網-錼創總覽</a>(查詢時間2026/8/11)</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司背景</h3>
+  <p>PlayNitride Inc.(錼創科技-KY),成立於2014年2月25日,2022年8月18日於台灣證券交易所創新板上市,資本額11.76億元。董事長暨總經理李允立,發言人陳銘章。主要營業項目為微型化發光二極體(MicroLED)元件、模組及面板相關產品之研究、開發、設計、製造、銷售及其製程設備之設計、安裝及維修與創新技術授權。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">營收與獲利</h3>
+  <p>2026年3月營收5,502萬元,月增71.83%,年減29.76%;3月累計營收1.36億元,累計年減54.7%。2025年全年營收13.52億元。2025年第4季EPS為2.04元,季增204%,年增85%;累積至2025全年EPS為-1.02元,年減282%;2024全年EPS為0.56元。公司表示營收較去年同期減少,主要係因工程收入減少所致。</p>
+  <p class="snap-note">資料來源:<a href="https://www.nstock.tw/stock_info?stock_id=6854" target="_blank">nStock</a>、<a href="https://winvest.tw/Stock/Symbol/Comment/6854" target="_blank">Win投資</a></p>
+
+  <div class="callout warn">
+    <b>⚠ 這點呼應第一步規則四的疑慮</b>:2026年3月累計營收年減幅高達54.7%,顯示公司傳統Micro LED顯示應用業務仍處於明顯衰退狀態,與第一步觀察到的「本業持續燒錢」現象互相印證。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">近期焦點:轉向光通訊/CPO應用</h3>
+  <p>公司近期積極對外溝通從傳統Micro LED顯示應用,轉向AI伺服器所需的CPO(共同封裝光學)、光通訊領域機會,包括「錼創強攻光通訊轉型股價漲逾8%」「光進銅退大趨勢 錼創、富采、鼎元強攻Micro LED光通訊商機」「錼創李允立:MicroLED跨入CPO進度超預期 最快2年迎大規模應用」等一系列新聞,顯示這是市場近期給予股價想像空間的主要敘事,也可能是2025年鉅額募資背後的資金用途。</p>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>深入討論:Micro LED CPO業務轉型</h2>
+
+  <div class="callout warn">
+    錼創的核心敘事是把Micro LED從傳統顯示應用,轉向AI伺服器機櫃內短距高速傳輸的CPO市場——具備比傳統銅線省下70%-90%功耗的優勢。但必須留意管理層說法(最快2年爆發)與第三方研調機構TrendForce的預估(2028下半年才明顯放量,2030年市場規模僅8.48億美元)之間存在明顯的時間落差。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">Micro LED CPO的技術邏輯</h3>
+  <p>隨著人工智慧算力需求激增,傳統銅線傳輸面臨訊號衰減與能效過低等挑戰。研調機構TrendForce分析指出,Micro LED CPO方案具備極高的能效優勢,單位傳輸能耗僅約傳統銅纜方案的5%,預計可節省70%至90%的功耗。以1.6Tbps光通訊產品為例,改採Micro LED架構後,整體功耗有望從30W大幅降至1.6W左右。</p>
+  <p class="snap-note">資料來源:<a href="https://news.cnyes.com/news/id/6406774" target="_blank">鉅亨網</a>、<a href="https://anuenews.cnyes.com/news/id/6453325" target="_blank">鉅亨網</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">錼創的具體佈局</h3>
+  <p>錼創與世芯集團旗下的光循科技(Brillink)展開策略合作,公司利用Micro LED作為發射端,試圖透過光通訊技術解決傳統銅線在高速傳輸下的訊號衰減與能耗問題。錼創則扮演國際合作橋樑,目前已與荷蘭展開密切計畫,協助台灣業者整合優勢打入全球供應鏈。在2026年Touch Taiwan智慧顯示大展中,錼創突破高密度陣列技術。</p>
+  <p class="snap-note">資料來源:<a href="https://uanalyze.com.tw/articles/8315750090" target="_blank">優分析UAnalyze</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">管理層的樂觀時程</h3>
+  <p>董事長李允立指出,Micro LED應用於網通產業的光互連技術,預估最快在2年至3年內就能實現。李允立對2026年營運持審慎樂觀看法,受惠於高毛利的委託開發設計(NRE)新案挹注,法人看好錼創今年下半年營運動能將顯著增強並有望轉盈。預估2026年NRE營收占比將提升至23%,成為推動毛利優化的重要引擎。</p>
+  <p class="snap-note">資料來源:<a href="https://news.cnyes.com/news/id/6422908" target="_blank">鉅亨網</a></p>
+
+  <div class="callout danger">
+    <b>⚠ 第三方研調機構的較保守時程</b><br>
+    TrendForce表示,隨著多個供應商結盟成形(友達+富采+鼎元、錼創+光循、京東方+新相微電子等多路人馬同時競逐),考量產品規格制定、送樣驗證等流程所需要的時間,預期Micro LED CPO光收發模組出貨量最快將於2028下半年明顯提升,於2030年貢獻市場約8.48億美元產值——這是全產業共享的市場規模,不是錼創一家獨得。
+    <p class="snap-note" style="margin-top:.5rem;">資料來源:<a href="https://anuenews.cnyes.com/news/id/6453325" target="_blank">鉅亨網</a></p>
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">對前兩步疑慮的意義</h3>
+  <p><b>1. 解釋了2025年鉅額募資的可能用途</b>——很可能用來支應這波CPO技術轉型的研發投入與產線建置,屬於策略性提前佈局。<b>2. 但傳統本業的衰退不會因為新故事而消失</b>——公司目前正處於「舊業務衰退、新業務尚未接棒」的空窗期。<b>3. 股價波動劇烈與敘事型消息高度連動</b>——4月17日單日股價因轉型消息大漲逾8%,顯示這是典型的「story stock」。<b>4. 時間落差是最大的風險</b>——如果實際進度更貼近TrendForce的保守估計,現金流吃緊的狀況可能會反覆出現。</p>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近13個月)</h2>
+
+  <div class="callout danger">
+    2025年11月創下13個月最高峰1.84億元後,2026年1月起營收急遽腰斬,此後長期在0.3-0.6億元的低檔區間徘徊,7月僅0.57億元,不到去年11月高點的三分之一。與第3步討論的CPO轉型故事形成強烈對比——市場給予的是遙遠未來的想像空間,但眼前的實際營收數字正在明顯萎縮。
+  </div>
+
+  <div class="chart-wrap">
+    <svg viewBox="0 0 950 380" style="width:100%;height:auto;" role="img" aria-label="錼創近13個月月營收長條圖">
+      <line x1="60" y1="320" x2="930" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="260" x2="930" y2="260" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="200" x2="930" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="140" x2="930" y2="140" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="80"  x2="930" y2="80"  stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="264" text-anchor="end" font-size="11" fill="#8B93A0">0.5</text>
+      <text x="50" y="204" text-anchor="end" font-size="11" fill="#8B93A0">1.0</text>
+      <text x="50" y="144" text-anchor="end" font-size="11" fill="#8B93A0">1.5</text>
+      <text x="50" y="84"  text-anchor="end" font-size="11" fill="#8B93A0">2.0</text>
+
+      <rect x="73"  y="191.6" width="48" height="128.4" rx="3" fill="#378ADD"/>
+      <text x="97"  y="185.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.07</text>
+      <text x="97"  y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+
+      <rect x="139" y="185.6" width="48" height="134.4" rx="3" fill="#378ADD"/>
+      <text x="163" y="179.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.12</text>
+      <text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+
+      <rect x="205" y="150.8" width="48" height="169.2" rx="3" fill="#378ADD"/>
+      <text x="229" y="144.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.41</text>
+      <text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+
+      <rect x="271" y="138.8" width="48" height="181.2" rx="3" fill="#378ADD"/>
+      <text x="295" y="132.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.51</text>
+      <text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+
+      <rect x="337" y="99.2" width="48" height="220.8" rx="3" fill="#EDA100"/>
+      <text x="361" y="93.2" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">1.84</text>
+      <text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">25/11</text>
+
+      <rect x="403" y="137.6" width="48" height="182.4" rx="3" fill="#378ADD"/>
+      <text x="427" y="131.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.52</text>
+      <text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+
+      <rect x="469" y="261.2" width="48" height="58.8" rx="3" fill="#378ADD"/>
+      <text x="493" y="255.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.49</text>
+      <text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+
+      <rect x="535" y="281.6" width="48" height="38.4" rx="3" fill="#D4537E"/>
+      <text x="559" y="275.6" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">0.32</text>
+      <text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+
+      <rect x="601" y="254.0" width="48" height="66.0" rx="3" fill="#378ADD"/>
+      <text x="625" y="248.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.55</text>
+      <text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+
+      <rect x="667" y="261.2" width="48" height="58.8" rx="3" fill="#378ADD"/>
+      <text x="691" y="255.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.49</text>
+      <text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+
+      <rect x="733" y="256.4" width="48" height="63.6" rx="3" fill="#378ADD"/>
+      <text x="757" y="250.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.53</text>
+      <text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/05</text>
+
+      <rect x="799" y="261.2" width="48" height="58.8" rx="3" fill="#378ADD"/>
+      <text x="823" y="255.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.49</text>
+      <text x="823" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/06</text>
+
+      <rect x="865" y="251.6" width="48" height="68.4" rx="3" fill="#378ADD"/>
+      <text x="889" y="245.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">0.57</text>
+      <text x="889" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/07</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近13期新高　粉色=近13期低點</div>
+  </div>
+
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th><th>26/06</th><th>26/07</th></tr></thead>
+    <tbody>
+      <tr><td class="label">年增%</td><td>+5.7%</td><td>+5.3%</td><td>+25.1%</td><td>+7.7%</td><td class="peak">+21.9%</td><td>-17.6%</td><td>-60.1%</td><td class="trough">-67.7%</td><td>-29.8%</td><td>-7.4%</td><td>+5.1%</td><td>-51.6%</td><td>-46.7%</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:<a href="https://tw.stock.yahoo.com/quote/6854.TW/revenue" target="_blank">Yahoo股市-錼創營收表</a>(查詢時間2026/8/11)</p>
+
+  <p>這張圖清楚呈現兩個截然不同的階段:第一階段(2025年7-11月)營收穩定成長,年增率維持正值,11月來到13個月高點1.84億元;第二階段(2025年12月-2026年7月)營收急速下滑且持續低迷,2026年2月創下13個月低點0.32億元、年減67.69%。公司在營收公告中自行說明「本年營收較去年同期減少,主要係因工程收入減少所致」,這暗示了傳統顯示應用相關的專案性工程收入正在萎縮,而能帶動未來成長的CPO/NRE業務,截至目前為止尚未能在月營收數字上看到明確的接棒訊號。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>估值分析(替代本益比方法)</h2>
+
+  <div class="callout warn">
+    與先前分析的四家公司不同,錼創目前查無FactSet或主要券商的正式EPS預估與目標價覆蓋——這代表這是一家尚未進入主流法人研究視野的小型「創新板」公司,估值主要由市場情緒與消息面主導,而非扎實的財務模型支撐。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">為什麼本益比在這裡不適用</h3>
+  <p>本益比的公式是「股價÷每股盈餘」,但錼創近四季EPS為-2.69元(負值),分母是負的,計算出來的本益比沒有實質意義,這也是為什麼各家股市資訊網站在錼創的本益比欄位都顯示「--」。要評估這類虧損中的成長型公司,需要改用其他角度來評估。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">替代角度一:股價淨值比(P/B)</h3>
+  <p>錼創目前股價淨值比約5.14-5.31倍,每股淨值18.22元。這代表市場願意用超過5倍的帳面淨值來買這家公司,遠高於1倍,顯示市場並非用「現有資產價值」在定價,而是用「未來故事能否兌現」在定價。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">替代角度二:市值對照未來市場規模</h3>
+  <p>目前市值約110億元。TrendForce預估Micro LED CPO光收發模組市場,要到2030年才會達到約8.48億美元(約新台幣270億元)的產值規模,且這是整個產業(含友達、富采、鼎元、錼創、京東方等多家競爭者)的總市場規模,不是錼創一家能獨吞。以簡化角度思考,如果錼創能拿下這個2030年市場的三到四成(相當樂觀的假設),對應營收規模大約80-100億元新台幣左右,以科技類股常見的2-5倍營收評價來看,遠期市值上限大約落在200-500億元區間——這跟目前110億元市值相比理論上仍有想像空間,但這個推算建立在極多樂觀假設之上,實際落差可能很大。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">與先前四次分析的關鍵差異</h3>
+  <table class="compare-table">
+    <thead><tr><th>項目</th><th>光寶科/頎邦/緯穎</th><th>錼創</th></tr></thead>
+    <tbody>
+      <tr><td class="label">獲利狀態</td><td>穩定獲利</td><td class="neg">持續虧損</td></tr>
+      <tr><td class="label">估值方法</td><td>本益比、EPS成長率</td><td>股價淨值比、市值/潛在市場規模</td></tr>
+      <tr><td class="label">法人覆蓋</td><td>FactSet多家分析師預估</td><td class="neg">查無正式法人預估與目標價</td></tr>
+      <tr><td class="label">股價驅動因素</td><td>財報數字+產業展望</td><td>消息面+題材想像空間</td></tr>
+      <tr><td class="label">時間維度</td><td>1-3年可驗證</td><td>需2027-2030年才能驗證故事是否兌現</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout danger">
+    <b>不確定性揭露(本次特別重要,且與先前四次性質不同)</b><br>
+    這不是「估值分歧大不大」的問題,而是根本沒有足夠的法人研究基礎可以做傳統的估值定錨。這類公司的股價,短期內主要跟隨消息面劇烈波動,與公司實際營收、獲利數字的連動性相對較弱。投資這類公司,本質上更接近「押注一個尚在早期階段的技術故事能否成真」,而不是「用合理價格買進一家體質健全、獲利穩定的公司」。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+
+  <div class="callout warn">
+    <b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。
+  </div>
+
+  <div class="callout danger">
+    <b>核心切入點</b>:錼創是六次分析中風險輪廓最特殊的一次——現金流盲測分數最低(39.2%)、公司持續虧損、缺乏法人正式覆蓋、股價高度仰賴消息面題材。這是一家本質上偏向投機性質的早期技術故事股,決策推理的邏輯需要跟先前四次完全不同。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>不會進場,或最多只用能承受歸零的極小部位去參與。現金流體質是六次分析中最弱的一次,且成因跟緯穎那種業務規模爆發性成長造成的正常波動性質不同——錼創是傳統本業持續萎縮、新業務尚未貢獻營收,現金流吃緊反映的是實質的經營壓力。2023年出現的「內外皆無現金活水」情境值得高度警惕,代表公司一旦資本市場募資管道收緊,隨時可能重演現金枯竭的處境。CPO故事的時間落差是最大的不確定性來源:管理層喊出「最快2年」,第三方研調機構TrendForce預估要到2028下半年才明顯放量、2030年整體市場規模僅8.48億美元。缺乏法人正式覆蓋代表沒有第三方專業機構持續追蹤驗證公司說法。近13個月營收呈現懸崖式下滑,且目前沒有看到新業務接棒的具體訊號,現階段買進更像是「賭一個還沒開始兌現的故事」。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向大幅減碼或考慮出清,除非對Micro LED CPO技術本身有超越市場平均水準的獨立判斷與信心。如果持股部位是基於題材消息買進、且部位不小,建議重新評估——目前股價已從52週高點197.5元腰斬至93.7元附近,顯示市場對這個故事的信心本身也在動搖。如果願意續抱,務必設定明確的止損或部位上限,並且不要把它當成核心持股,因為現金流體質疑慮加上缺乏法人驗證,意味著這檔股票的下檔風險難以用傳統方法量化。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號(尚未發生,用於未來驗證)</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">月營收是否出現新業務(CPO/NRE)明確接棒的訊號,而非持續在0.3-0.6億元低檔盤整</td><td>每月營收公告(次月上旬)</td><td class="label">若連續數月明顯回升且來自CPO/NRE貢獻,是轉機訊號;若持續低迷,故事兌現時程可能比預期更久</td></tr>
+      <tr><td class="label">2026年下半年財報是否如管理層所說「轉盈」</td><td>2026Q3/Q4財報公布(約11月、隔年3月)</td><td class="label">若如期轉盈且非一次性業外收益,支持公司說法;若持續虧損,需重新檢視管理層預估的可信度</td></tr>
+      <tr><td class="label">現金餘額是否再度出現2023年那種「內外皆無現金活水」的情境</td><td>每季財報公布</td><td class="label">若再次出現且無新一輪募資支撐,是嚴重警訊,可能面臨資金鏈壓力</td></tr>
+      <tr><td class="label">是否有主要券商開始正式覆蓋並發布EPS預估與目標價</td><td>不定期</td><td class="label">若開始有法人覆蓋,代表故事開始獲得專業機構認可;持續無人覆蓋則風險定價更加困難</td></tr>
+      <tr><td class="label">與光循(Brillink)、荷蘭合作夥伴等策略夥伴的具體進展是否有具體公告</td><td>不定期(依公司公告)</td><td class="label">具體、可驗證的里程碑公告(而非「進度超乎預期」這類抽象說法)是判斷故事真實性的關鍵</td></tr>
+    </tbody>
+  </table>
+  <p>這五項訊號中,最優先觀察的是前兩項——月營收是否出現新業務接棒訊號、下半年是否真的如期轉盈,因為這兩者是最直接、最快能驗證管理層說法是否可信的證據。在這些訊號未明朗之前,這是六次分析中最不建議貿然進場的一次。</p>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-11　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = link.getAttribute('href').substring(1);
+      var target = document.getElementById(id);
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+
+  var sections = links.map(function(link){
+    return document.getElementById(link.getAttribute('href').substring(1));
+  }).filter(Boolean);
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
