@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>緯穎(6669) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14;
+  --surface:#131A21;
+  --ink:#E7ECEF;
+  --ink-soft:#9AA7B0;
+  --ink-mute:#6B7680;
+  --border:#232B33;
+  --navy:#17202B;
+  --navy-deep:#0B0F14;
+  --teal:#34D399;
+  --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171;
+  --red-bg:rgba(248,113,113,0.12);
+  --amber:#FBBF24;
+  --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6;
+  --pink-bg:rgba(244,114,182,0.12);
+  --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Noto Sans TC',sans-serif;
+  line-height:1.7;
+  padding-bottom:6rem;
+}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+.mono{font-family:'Roboto Mono',monospace;}
+
+header{
+  background:var(--navy-deep);
+  color:#F4F1E8;
+  padding:2.5rem 2rem 2rem;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{
+  display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;
+  background:rgba(251,191,36,0.15);color:#FCD34D;font-size:13px;border:1px solid rgba(251,191,36,0.3);
+}
+
+.stepnav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,15,20,0.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:center;flex-wrap:wrap;
+  padding:.6rem 1rem;gap:.4rem;
+}
+.stepnav a{
+  font-size:13px;padding:.45rem .9rem;border-radius:20px;
+  color:var(--ink-soft);text-decoration:none;border:1px solid transparent;
+  white-space:nowrap;
+}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+
+.step-eyebrow{
+  font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;
+  color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;
+}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+
+.callout{
+  border-left:4px solid var(--teal);
+  background:var(--surface);
+  border-radius:0 10px 10px 0;
+  padding:1rem 1.3rem;
+  margin-bottom:1.5rem;
+  font-size:15px;
+}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;}
+.neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+
+.rule-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:1.2rem 1.4rem;margin-bottom:1rem;
+}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{
+  font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;
+  padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);
+}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--amber-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--amber);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+
+.signal-table td.label{white-space:normal;}
+
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TWSE : 6669</div>
+  <h1>緯穎科技服務股份有限公司</h1>
+  <div class="sub">WIWYNN CORPORATION　個股初步分析報告　生成日期 2026/08/11</div>
+  <div class="alert">⚠ 現金流盲測分數50.8%,低於一般門檻;成因與代採購模式轉換有關,詳見第1、3步</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ 代採購模式深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 本益比預估</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+
+  <div class="callout warn">
+    <b>總分 50.8%,低於「良好」門檻。</b>規則一(A逐年波動劇烈)與規則四(頻繁觸發最高警戒組合)是最大疑慮,但規則六(現金餘額持續攀升)顯示公司資金部位並未失控。此案例的低分成因,很可能與伺服器代工業的產業特性有關,建議搭配第2、3步再做完整判斷。
+  </div>
+
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2016</td><td class="trough">-48.3</td><td class="neg">-6.13</td><td class="pos">+52.4</td><td>4.03</td><td>12.8</td></tr>
+      <tr><td class="label">2017</td><td class="pos">42.1</td><td class="pos">+5.28</td><td class="pos">+5.49</td><td>16.4</td><td>64</td></tr>
+      <tr><td class="label">2018</td><td class="neg">-102</td><td class="neg">-1.61</td><td class="pos">+51.7</td><td>70.9</td><td class="trough">14</td></tr>
+      <tr><td class="label">2019</td><td class="pos">79.1</td><td class="neg">-6.72</td><td class="pos">+34.6</td><td>77.6</td><td>120</td></tr>
+      <tr><td class="label">2020</td><td class="pos">141</td><td class="neg">-6.19</td><td class="neg">-22.3</td><td>109</td><td>232</td></tr>
+      <tr><td class="label">2021</td><td class="neg">-142</td><td class="neg">-10.4</td><td class="pos">+149</td><td>110</td><td>227</td></tr>
+      <tr><td class="label">2022</td><td class="peak">307</td><td class="neg">-19.3</td><td class="trough">-262</td><td>179</td><td>262</td></tr>
+      <tr><td class="label">2023</td><td class="pos">231</td><td class="neg">-47</td><td class="neg">-71.1</td><td>154</td><td>375</td></tr>
+      <tr><td class="label">2024</td><td class="neg">-200</td><td class="neg">-56.5</td><td class="pos">+363</td><td>288</td><td>483</td></tr>
+      <tr><td class="label">2025</td><td class="neg">-6.24</td><td class="neg">-138</td><td class="pos">+562</td><td>661</td><td class="peak">899</td></tr>
+      <tr><td class="label">26Q2(單季,僅供參考)</td><td class="neg">-616</td><td class="neg">-121</td><td class="pos">+699</td><td>369</td><td>853</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。2014-2015因規模過小僅供參考不列入計分。</p>
+
+  <div class="rule-card">
+    <h3>規則一・A 逐年成長趨勢 <span class="rule-score low">30 / 100</span></h3>
+    <p>六次分析中最劇烈的波動案例——A在正負值之間幾乎逐年反覆橫跳:2016(-48.3)→2017(42.1)→2018(-102)→2019(79.1)→2020(141)→2021(-142)→2022(307)→2023(231)→2024(-200)→2025(-6.24)。完全看不出任何穩定的成長方向,是典型的「大起大落」型。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則二・B 投資紀律評估 <span class="rule-score">65 / 100(暫定)</span></h3>
+    <p>B從2016年的-6.13,一路擴大到2025年的-138,呈現持續且明確擴大的投資力道,與公司營收規模同步成長。雖然金額擴張速度快,但方向一致、沒有時緊時鬆的雜亂訊號,屬於「穩定擴張」型。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則三・B 投資效益分析(對照隔年 A) <span class="rule-score mid">55 / 100</span></h3>
+    <table style="margin:0.6rem 0 0;">
+      <thead><tr><th>投資年度(B)</th><th>對應 A</th><th>效益</th></tr></thead>
+      <tbody>
+        <tr><td>2018 B=-1.61</td><td class="pos">2019 A=79.1(轉強)</td><td>轉強 ✓</td></tr>
+        <tr><td>2019 B=-6.72</td><td class="pos">2020 A=141(續強)</td><td>轉強 ✓</td></tr>
+        <tr><td>2020 B=-6.19</td><td class="neg">2021 A=-142(轉負)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2021 B=-10.4</td><td class="pos">2022 A=307(大增)</td><td>轉強 ✓</td></tr>
+        <tr><td>2022 B=-19.3</td><td class="pos">2023 A=231(維持強勢)</td><td>轉強 ✓</td></tr>
+        <tr><td>2023 B=-47(投資加碼)</td><td class="neg">2024 A=-200(轉負)</td><td>未轉強 ✗</td></tr>
+        <tr><td>2024 B=-56.5(投資加碼)</td><td class="neg">2025 A=-6.24(仍負)</td><td>未轉強 ✗</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.6rem;">近三年(2023-2025)投資力道持續加碼,但隔年A卻連續三年無法轉強,近期投資轉化效果明顯轉弱。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則四・C 融資活動合理性 <span class="rule-score low">30 / 100</span></h3>
+    <p>檢查「A負值+C正值」最高警戒組合:2016、2018、2021、2024、2025(及26Q2參考)共5個年度觸發,幾乎每兩年就出現一次,且近三年呈現連續觸發、金額持續放大的態勢——2025年融資活動淨流入高達562億元,26Q2單季更達699億元。這是六次分析中觸發頻率最高、金額最大的案例。但需說明:這種模式在高成長型代工廠身上並不罕見,可能是備料墊款週期造成的營運資金波動,而非必然的財務體質警訊,細項未取得前無法完全排除疑慮。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則五・A &gt; D 現金流品質(嚴格二分法) <span class="rule-score mid">40 / 100</span></h3>
+    <p>10年中5年通過,50%。特別留意2025年:稅前淨利高達661億元(創歷史新高),但營業活動現金流卻是-6.24億元,幾乎完全沒有轉化為實際現金流入——帳面獲利與實際現金的落差是六次分析中最懸殊的一次,反映快速成長帶來的存貨與應收帳款大量墊高。</p>
+  </div>
+
+  <div class="rule-card">
+    <h3>規則六・E 期末現金餘額穩定性 <span class="rule-score high">85 / 100</span></h3>
+    <p>六次分析中最強勁的長期成長軌跡:除2017→2018出現一次明顯回落(64→14)外,從2019年起幾乎逐年攀升:120→232→262→375→483→899,26Q2續維持在853的高檔水準。儘管A、C劇烈波動,期末現金餘額本身反而穩定且持續成長,顯示公司整體現金部位管理得當。</p>
+  </div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">30</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">65</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">55</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">30</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">40</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">85</div></div>
+  </div>
+  <div class="total-score">
+    <div class="v">50.8%</div>
+    <div class="l">六項平均總分・低於一般門檻・使用者選擇繼續分析</div>
+  </div>
+  <p class="snap-note">規則一、四的核心疑慮幾乎都指向同一個成因——營運資金隨訂單規模劇烈波動,這是伺服器/雲端基礎設施代工產業常見的財務特徵,而非必然代表公司體質不佳。此判斷於第3步獲得進一步驗證。</p>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+
+  <div class="callout">
+    股價 <b>5,885元</b>(2026/8/11盤中,-2.08%),本益比約 <b>19.73倍</b>,近四季EPS高達298.32元。7月營收創單月新高1,176.86億元,年增率39.23%,前7月累計營收年增41.27%。
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric"><div class="l">股價(8/11盤中)</div><div class="v">5,885</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">19.73</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">298.32</div></div>
+    <div class="metric"><div class="l">當季EPS(Q2)</div><div class="v">75.95</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">241.56</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">24.87</div></div>
+    <div class="metric"><div class="l">殖利率</div><div class="v">2.40%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">6,400 / 2,745</div></div>
+  </div>
+  <p class="snap-note">資料來源:<a href="https://www.cnyes.com/twstock/6669" target="_blank">鉅亨網-緯穎總覽</a>(查詢時間2026/8/11)</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司背景</h3>
+  <p>緯穎科技服務股份有限公司(Wiwynn Corporation),成立於2012年3月3日,2017年11月13日上市,資本額56.01億元,主要經營業務為資料中心產品。董事長洪麗宓,總經理林威遠。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">營收與獲利(2026年7月最新)</h3>
+  <p>緯穎7月營收達1,176.86億元,較6月成長5.67%,較去年同期成長39.23%,累計前7月營收為6,723.46億元,年增41.27%。6月合併營收重返千億大關,達1,113.71億元,創下單月歷史新高,月增33%、年成長29.8%。第2季合併營收2,781.53億元,季成長0.6%、年增26.0%,毛利率9.3%,稅後純益149.69億元,每股純益80.43元。上半年度合併營收達5,546.60億元,年增41.7%;稅後純益290.84億元,年增32.7%,EPS為156.38元,高於去年同期的117.93元,為同期歷史新高。</p>
+  <p class="snap-note">資料來源:<a href="https://news.cnyes.com/news/id/6564975" target="_blank">鉅亨網營收速報</a>、<a href="https://udn.com/news/story/7252/9677920" target="_blank">聯合新聞網-緯穎財報</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">股利</h3>
+  <p>緯穎法說會擬配發每股145元股息及20元股票股利,現金殖利率逾3%。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">下半年資本支出計畫與成長引擎</h3>
+  <p>緯穎8月7日召開董事會,通過2026年度第2季財報,以及下半年資本支出預算案,規劃預算案9.42億美元(約合新台幣304.04億元)。下半年三引擎為GB300世代整櫃放量、ASIC新專案(Trainium 3)量產、切入switch tray/UBB組裝推升單櫃價值量。公司對子公司增資5億美元備料;投資Ayar Labs卡位CPO(共同封裝光學);產能由台灣+墨西哥擴展為台灣、墨西哥、馬來西亞、捷克、美國德州五地布局,大規模資本投入顯示管理層對訂單能見度(法人稱可見至2027)的信心。</p>
+  <p class="snap-note">資料來源:<a href="https://udn.com/news/story/7252/9677920" target="_blank">聯合新聞網</a>、<a href="https://namecard.events/2026/07/19/wiwynn-6669-2026q1-earnings/" target="_blank">Namecard Events</a></p>
+
+  <div class="callout">
+    這段內容直接回應第一步的疑慮——法說會提到「對子公司增資5億美元備料」,正好對應現金流分析中規則四頻繁出現的「A負值+C正值」警戒組合:公司透過外部資金(增資、借款)來支應快速擴張所需的龐大備料與資本支出,這是主動且策略性的財務操作,搭配五地產能布局與訂單能見度延伸至2027年的說法,傾向支持「產業特性導致的正常財務波動」而非「體質惡化的警訊」這個解讀方向。
+  </div>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>深入討論:「代採購模式」轉換對財報可比較性的影響</h2>
+
+  <div class="callout warn">
+    「代採購模式」轉換是一項會計/商業安排調整,而非獲利能力變化——它改變的是記憶體成本該不該計入營收與銷貨成本,而非改變公司實際賺多少錢。這個轉換從2026年4月開始上路,直接造成當月營收單月月減16.14%的「假性衰退」,卻同時讓毛利率明顯回升。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">轉換的背景</h3>
+  <p>記憶體與處理器等關鍵零組件持續上漲,導致伺服器ODM廠面臨極大的資金周轉壓力與毛利率壓力。由於零組件價格飆漲,ODM廠在AI伺服器專案上仍需負責代客戶零組件採購,雖然最終獲利表現不會受到衝擊,但毛利率可能因此下降,因此開始有代工廠與客戶協調,由客戶直接負責採購的「Consignment模式」,以維持毛利率表現。緯穎董事長洪麗寗表示,最近也在跟客人討論是否能改變零組件採購方式,以降低對財報的影響性。</p>
+  <p class="snap-note">資料來源:<a href="https://money.udn.com/money/story/5612/9523863" target="_blank">經濟日報</a>、<a href="https://udn.com/news/story/7240/9525112" target="_blank">聯合新聞網</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">實際發生的財報影響:4月營收「消失」的16%</h3>
+  <p>緯穎5月7日召開董事會,通過2026年第一季財報,單季合併營收達2,765.08億元,年增62%。自4月起,部分客戶的記憶體改採「代採購模式」,不計入營收,因此4月營收降至827.31億元,月減16.14%,但仍較去年同期成長29.67%。緯穎強調,雖然營收認列方式改變,但實際伺服器機櫃出貨量仍較前月增加,且獲利率同步提升,全年獲利不受商業模式調整影響,整體出貨量仍維持雙位數成長目標。</p>
+  <p class="snap-note">資料來源:<a href="https://www.chinatimes.com/realtimenews/20260507003965-260410" target="_blank">中時新聞網</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">市場的解讀:反映ODM真正價值</h3>
+  <p>這項轉變被市場評析為「成功反映ODM真正價值的第一步」。台系券商出具報告調升緯穎目標價至6,600元。</p>
+  <p class="snap-note">資料來源:<a href="https://www.digitimes.com.tw/tech/dt/n/shwnws.asp?id=0000754606_CU07I1ZBLL35YQ7W4Y1C3" target="_blank">DIGITIMES</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">對財報可比較性的四層具體影響</h3>
+  <p><b>1. 營收成長率不再是「蘋果比蘋果」</b> —— 2026年4月以前的營收數字包含記憶體零組件的全額採購成本,4月以後(部分客戶)則不包含,同一份月營收表裡前後期的計算基礎已不一致。</p>
+  <p><b>2. 毛利率會系統性走高,但不代表獲利能力真正改善</b> —— 把低毛利的記憶體轉嫁成本從營收中剔除,分母縮小,毛利率百分比自然墊高,但毛利金額幾乎沒有變化,獲利絕對金額不受影響。</p>
+  <p><b>3. 呼應並部分緩解第一步規則四的疑慮</b> —— 代採購模式如果全面鋪開,理論上會讓緯穎不再需要先墊付記憶體採購資金、再等客戶付款回收這段現金流缺口,對緯穎自身的營運資金壓力是實質的紓緩,但目前僅適用於部分客戶,尚未全面轉換。</p>
+  <p><b>4. 分析未來季度數字時需交叉檢視營收與毛利率</b> —— 台系券商將第二季營收預估下修約5%(反映代採購金額不再計入營收),但將毛利率預估上修至7.8%,顯示專業法人已開始把「營收+毛利率」兩個數字放在一起交叉檢視,而非單獨看營收成長率或毛利率高低。與其糾結單一季度營收年增率,更可靠的指標是稅後淨利、EPS這些不受採購模式影響的底線數字。</p>
+
+  <div class="callout">
+    如果代採購模式未來持續擴大到更多客戶,第一步中規則一(A逐年趨勢劇烈波動)與規則四(頻繁觸發A負C正警戒組合)的分數,有機會在未來幾年隨著轉換完成而逐步改善,因為這正是造成波動的結構性成因之一。但這是往前看的推測,截至目前為止的歷史數據(2016-2025)並未受這個2026年才開始的轉換影響。
+  </div>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近13個月)</h2>
+
+  <div class="callout">
+    2026年4月的低點(827億)正是代採購模式轉換造成的技術性下滑,不是需求衰退。真正值得留意的訊號是年增率從2025年下半年動輒150-200%的水準,急速收斂到2026年3-5月僅13.9%-18.2%,而6-7月年增率重新回升到29.8%、39.2%,顯示新一輪成長動能(GB300、Trainium 3放量)已經開始接棒。
+  </div>
+
+  <div class="chart-wrap">
+    <svg viewBox="0 0 950 380" style="width:100%;height:auto;" role="img" aria-label="緯穎近13個月月營收長條圖">
+      <line x1="60" y1="320" x2="930" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="251" x2="930" y2="251" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="183" x2="930" y2="183" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="114" x2="930" y2="114" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="255" text-anchor="end" font-size="11" fill="#8B93A0">400</text>
+      <text x="50" y="187" text-anchor="end" font-size="11" fill="#8B93A0">800</text>
+      <text x="50" y="118" text-anchor="end" font-size="11" fill="#8B93A0">1200</text>
+
+      <rect x="73"  y="175.14" width="48" height="144.86" rx="3" fill="#378ADD"/>
+      <text x="97"  y="169" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">845</text>
+      <text x="97"  y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+
+      <rect x="139" y="155.43" width="48" height="164.57" rx="3" fill="#378ADD"/>
+      <text x="163" y="149" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">960</text>
+      <text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+
+      <rect x="205" y="172.06" width="48" height="147.94" rx="3" fill="#378ADD"/>
+      <text x="229" y="166" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">863</text>
+      <text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+
+      <rect x="271" y="163.49" width="48" height="156.51" rx="3" fill="#378ADD"/>
+      <text x="295" y="157" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">913</text>
+      <text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+
+      <rect x="337" y="153.89" width="48" height="166.11" rx="3" fill="#378ADD"/>
+      <text x="361" y="147.9" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">969</text>
+      <text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/11</text>
+
+      <rect x="403" y="141.20" width="48" height="178.80" rx="3" fill="#378ADD"/>
+      <text x="427" y="135.2" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1043</text>
+      <text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+
+      <rect x="469" y="177.37" width="48" height="142.63" rx="3" fill="#378ADD"/>
+      <text x="493" y="171.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">832</text>
+      <text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+
+      <rect x="535" y="157.83" width="48" height="162.17" rx="3" fill="#378ADD"/>
+      <text x="559" y="151.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">946</text>
+      <text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+
+      <rect x="601" y="150.80" width="48" height="169.20" rx="3" fill="#378ADD"/>
+      <text x="625" y="144.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">987</text>
+      <text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+
+      <rect x="667" y="178.23" width="48" height="141.77" rx="3" fill="#D4537E"/>
+      <text x="691" y="172.2" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">827</text>
+      <text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+
+      <rect x="733" y="175.83" width="48" height="144.17" rx="3" fill="#378ADD"/>
+      <text x="757" y="169.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">841</text>
+      <text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/05</text>
+
+      <rect x="799" y="129.03" width="48" height="190.97" rx="3" fill="#378ADD"/>
+      <text x="823" y="123" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1114</text>
+      <text x="823" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/06</text>
+
+      <rect x="865" y="118.23" width="48" height="201.77" rx="3" fill="#EDA100"/>
+      <text x="889" y="112" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">1177</text>
+      <text x="889" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">26/07</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近13期新高　粉色=代採購模式轉換造成的低點</div>
+  </div>
+
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th><th>26/06</th><th>26/07</th></tr></thead>
+    <tbody>
+      <tr><td class="label">年增%</td><td>+171.6%</td><td>+198.1%</td><td>+150.2%</td><td>+157.9%</td><td>+158.6%</td><td>+143.9%</td><td>+121.9%</td><td>+103.4%</td><td class="trough">+13.9%</td><td>+29.7%</td><td>+18.2%</td><td>+29.8%</td><td class="peak">+39.2%</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:<a href="https://tw.stock.yahoo.com/quote/6669.TW/revenue" target="_blank">Yahoo股市-緯穎營收表</a>、<a href="https://news.cnyes.com/news/id/6367159" target="_blank">鉅亨速報</a>(查詢時間2026/8/11)</p>
+
+  <p>這張圖清楚呈現三個階段:2025年7-12月年增率維持在143.9%-198.1%的超高速成長,反映AI伺服器需求全面噴發;2026年1-5月年增率急速收斂,1-2月主要是高基期效應,4-5月則主要是代採購模式的計算基礎改變所致;2026年6-7月年增率重新加速到29.8%、39.2%,6月單月1,114億元創歷史新高,7月續創新高1,177億元,累計前7月營收年增41.27%,對應法說會提到的GB300世代整櫃放量與Trainium 3量產開始貢獻營收。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>前瞻本益比 / EPS 預估</h2>
+
+  <div class="callout">
+    FactSet最新調查(20位分析師)顯示2026年EPS預估中位數已上修至 <b>353.75元</b>,對應現價(5,885元)前瞻本益比僅 <b>16.6倍</b>——這是六次分析中估值最「便宜」的一次,且法人預估連續10個月持續上修,呈現清楚且一致的樂觀軌跡。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">FactSet法人共識演變軌跡(2026年EPS預估與目標價)</h3>
+  <table>
+    <thead><tr><th>調查時間</th><th>EPS中位數</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2025/10/15</td><td>235.57元</td><td>3,930元</td></tr>
+      <tr><td class="label">2025/10/24</td><td>239.25元</td><td>4,080元</td></tr>
+      <tr><td class="label">2026/5/8</td><td>339.19元</td><td>6,020元</td></tr>
+      <tr><td class="label">2026/6/15</td><td>348.72元</td><td>6,600元</td></tr>
+      <tr><td class="label">2026/7/18</td><td><b>353.75元</b></td><td><b>6,633元</b></td></tr>
+    </tbody>
+  </table>
+  <p>這條軌跡呈現過去10個月持續且穩定的上修,目標價從3,930元一路墊高到6,633元,漲幅近69%,且過程中沒有出現反覆下修的情況——這與頎邦法人意見劇烈分歧的狀況截然不同,反映市場對緯穎AI伺服器成長故事的信心相對一致且持續增強。</p>
+  <p class="snap-note">資料來源:<a href="https://news.cnyes.com/news/id/6539225" target="_blank">鉅亨速報</a>、<a href="https://news.cnyes.com/news/id/6498877" target="_blank">鉅亨速報</a>、<a href="https://news.cnyes.com/news/id/6448330" target="_blank">鉅亨速報</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">最新FactSet完整預估區間(2026-2028年)</h3>
+  <table>
+    <thead><tr><th>年度</th><th>平均值</th><th>中位數</th><th>最高值</th><th>最低值</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年</td><td>348.54元</td><td><b>353.75元</b></td><td class="pos">385.48元</td><td class="neg">310.15元</td></tr>
+      <tr><td class="label">2027年</td><td>470.29元</td><td><b>469.23元</b></td><td class="pos">552.96元</td><td class="neg">399.94元</td></tr>
+      <tr><td class="label">2028年</td><td>563.82元</td><td><b>560.41元</b></td><td class="pos">648.01元</td><td class="neg">467.55元</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:<a href="https://today.line.me/tw/v3/article/KwV92vr" target="_blank">LINE TODAY轉載鉅亨速報</a></p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">前瞻本益比(現在貴不貴)</h3>
+  <table>
+    <thead><tr><th>基準</th><th>預估EPS(中位數)</th><th>前瞻本益比(現價5,885元÷預估EPS)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年</td><td>353.75元</td><td><b>16.6倍</b></td></tr>
+      <tr><td class="label">2027年</td><td>469.23元</td><td><b>12.5倍</b></td></tr>
+      <tr><td class="label">2028年</td><td>560.41元</td><td><b>10.5倍</b></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">目標本益比法試算</h3>
+  <p style="font-size:14px;color:var(--ink-soft);">以2027年中位數EPS 469.23元為基準,試算3組假設倍數情境:</p>
+  <table>
+    <thead><tr><th>假設本益比</th><th>目標價(469.23元 × 倍數)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">15倍(保守)</td><td>7,038元</td></tr>
+      <tr><td class="label">20倍(中性)</td><td>9,385元</td></tr>
+      <tr><td class="label">25倍(樂觀)</td><td>11,731元</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">外資最樂觀觀點:高盛上看1萬元</h3>
+  <p>高盛看好緯穎同時受惠GPU AI伺服器、ASIC AI伺服器及通用伺服器三大成長引擎,將目標價由7,147元大幅調升至1萬元。這個數字比FactSet共識中位數(6,633元)高出約51%,屬於最樂觀情境的估值,大致落在20-25倍本益比區間(套用2027年EPS)。</p>
+
+  <div class="callout warn">
+    <b>不確定性揭露</b><br>
+    雖然這次法人估值分歧程度遠低於頎邦,但仍有兩點需要留意:1) 代採購模式轉換對EPS可比較性的影響尚未完全反映在所有分析師模型中,法人在建構後續模型時若假設不一致,EPS預估之間仍可能存在方法論落差,這可能是310-385元這個區間存在的部分原因。2) 目前16.6倍的前瞻本益比是否真的代表「便宜」,取決於這波AI伺服器成長動能能否延續到2027-2028年,若GB300、Trainium 3放量不如預期或客戶資本支出出現周期性收縮,目前看似便宜的估值可能會因EPS成長不如預期而重新變貴。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+
+  <div class="callout warn">
+    <b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。
+  </div>
+
+  <div class="callout">
+    <b>核心切入點</b>:緯穎是六次分析中「數字看起來最矛盾、但矛盾成因最清楚」的一次——現金流盲測分數最低(50.8%),卻搭配法人持續且一致上修的估值軌跡、六次分析中最便宜的前瞻本益比(16.6倍)。
+  </div>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>會考慮進場,但採分批布局而非一次重壓。現金流盲測分數偏低,但成因相對可解釋:規則一、四的劇烈波動,在第3步已找到明確的結構性解釋——業務規模爆發性成長+記憶體代採購模式轉換+巨額備料資本支出,而非公司治理或財務造假疑慮。規則六(現金餘額穩定成長)提供重要的安全邊際,顯示公司整體資金調度能力沒有失控。估值面是六次分析中最具吸引力的一次:16.6倍的前瞻本益比,相對於同業平均30倍以上,以及法人持續10個月一致上修目標價,這種「便宜且趨勢一致向上」的組合並不常見。但目前股價5,885元已反映不少樂觀預期,52週波動區間本身就很大,分批進場能降低單一時點買在高點的風險。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向續抱,除非出現明確的動能反轉訊號。6-7月營收年增率重新加速到29.8%、39.2%,顯示GB300、Trainium 3放量已開始接棒,是判斷成長故事是否延續最直接的證據。法人上修軌跡持續且一致,沒有出現估值分歧擴大,不需要因單一利空消息而恐慌性減碼。但現金流體質的疑慮不會因股價上漲而自動消失,如果未來幾季A持續為負且規模持續擴大,而C持續仰賴大量外部資金填補,即使營收與EPS數字亮眼,也需要重新評估是否只是「用槓桿堆出來的成長」。</p>
+
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號(尚未發生,用於未來驗證)</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026Q3財報中A(營業活動現金流)是否止跌回穩</td><td>2026年11月上旬</td><td class="label">若連續轉正且金額回升,支持「結構性波動、非體質問題」的判斷;若持續惡化,需重新檢視</td></tr>
+      <tr><td class="label">代採購模式是否擴大至更多客戶</td><td>每月營收公告(次月上旬)</td><td class="label">若模式擴大導致營收認列基礎持續改變,需留意法人EPS預估模型是否已一致調整</td></tr>
+      <tr><td class="label">GB300、Trainium 3實際出貨量是否如期於下半年放量</td><td>2026Q3/Q4法說會(約10-11月)</td><td class="label">若放量不如預期,目前16.6倍的「便宜」估值可能因EPS成長不如預期而重新變貴</td></tr>
+      <tr><td class="label">FactSet目標價與EPS預估是否延續一致上修軌跡,或首次出現下修</td><td>每月法人預估更新</td><td class="label">若出現首次下修,可能代表市場對成長動能的信心開始動搖</td></tr>
+      <tr><td class="label">四大CSP(Meta、微軟、AWS、Google)2027年資本支出展望是否維持或上修</td><td>各公司財報/法說會(約每季)</td><td class="label">這是緯穎訂單能見度的源頭指標,若下游資本支出出現收縮訊號,將直接衝擊緯穎營收動能</td></tr>
+    </tbody>
+  </table>
+  <p>這五項訊號中,最優先觀察的是前兩項——Q3現金流是否改善、代採購模式的擴大範圍,因為這兩者最能直接驗證現在的現金流疑慮究竟只是成長期的暫時現象,還是需要更謹慎看待的體質問題。若這兩點在下一季財報中得到正面驗證,搭配已經相對便宜的估值與持續上修的法人共識,這會是六次分析中風險報酬比相對吸引人的一次。</p>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-11　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var id = link.getAttribute('href').substring(1);
+      var target = document.getElementById(id);
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+
+  var sections = links.map(function(link){
+    return document.getElementById(link.getAttribute('href').substring(1));
+  }).filter(Boolean);
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
