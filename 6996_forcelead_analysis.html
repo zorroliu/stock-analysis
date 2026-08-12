@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>力領科技(6996) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14; --surface:#131A21; --ink:#E7ECEF; --ink-soft:#9AA7B0; --ink-mute:#6B7680; --border:#232B33;
+  --navy:#17202B; --navy-deep:#0B0F14; --teal:#34D399; --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171; --red-bg:rgba(248,113,113,0.12); --amber:#FBBF24; --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6; --pink-bg:rgba(244,114,182,0.12); --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC',sans-serif;line-height:1.7;padding-bottom:6rem;}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+header{background:var(--navy-deep);color:#F4F1E8;padding:2.5rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border);}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;background:rgba(251,191,36,0.15);color:#FCD34D;font-size:13px;border:1px solid rgba(251,191,36,0.3);}
+.stepnav{position:sticky;top:0;z-index:50;background:rgba(11,15,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);display:flex;justify-content:center;flex-wrap:wrap;padding:.6rem 1rem;gap:.4rem;}
+.stepnav a{font-size:13px;padding:.45rem .9rem;border-radius:20px;color:var(--ink-soft);text-decoration:none;border:1px solid transparent;white-space:nowrap;}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+.step-eyebrow{font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+.callout{border-left:4px solid var(--teal);background:var(--surface);border-radius:0 10px 10px 0;padding:1rem 1.3rem;margin-bottom:1.5rem;font-size:15px;}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;} .neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--amber-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--amber);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+.signal-table td.label{white-space:normal;}
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TPEx : 6996</div>
+  <h1>力領科技股份有限公司</h1>
+  <div class="sub">FORCELEAD TECHNOLOGY CORP.　個股初步分析報告　生成日期 2026/08/12</div>
+  <div class="alert">⚠ 樣本數僅5個完整年度,現金流盲測分數可信度受限,詳見第1步</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ 法說會深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 本益比評估</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+  <div class="callout warn">
+    <b>總分 49.2%,低於「良好」門檻,且樣本數僅5個完整年度,統計意義相對薄弱。</b>主要疑慮集中在2022年現金儲備大幅蒸發事件,以及近兩年投資效益未能有效轉化為營業現金流成長。公司採取高配息率政策,是分數天然偏低的部分原因。
+  </div>
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2021</td><td class="peak">13.3</td><td class="neg">-5.26</td><td class="neg">-1.23</td><td>13.6</td><td class="peak">10.3</td></tr>
+      <tr><td class="label">2022</td><td class="trough">3.35</td><td class="pos">-0.82</td><td class="trough">-9.39</td><td>7.14</td><td class="trough">3.57</td></tr>
+      <tr><td class="label">2023</td><td class="pos">9.08</td><td class="neg">-4.33</td><td class="neg">-4.36</td><td>5.17</td><td>3.93</td></tr>
+      <tr><td class="label">2024</td><td class="pos">6.48</td><td class="trough">-8.87</td><td class="pos">+3.85</td><td>6.76</td><td>5.47</td></tr>
+      <tr><td class="label">2025</td><td class="pos">6.18</td><td class="pos">+0.47</td><td class="neg">-5.72</td><td>5.4</td><td>6.34</td></tr>
+      <tr><td class="label">26Q2(單季,僅供參考)</td><td class="pos">4.12</td><td class="pos">+0.15</td><td class="neg">-4.24</td><td>3.84</td><td>6.39</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。僅2021-2025年有完整年度數據,樣本數明顯少於其他分析案例。</p>
+
+  <div class="rule-card"><h3>規則一・A 逐年成長趨勢 <span class="rule-score mid">45 / 100</span></h3><p>2021年A高達13.3為五年最高點,但2022年驟降至3.35(暴跌75%),之後回升至9.08,2024、2025又連兩年小幅回落至6.48、6.18。整體看不出穩定成長方向,屬於「高點崩落後緩步整理」型。</p></div>
+  <div class="rule-card"><h3>規則二・B 投資紀律評估 <span class="rule-score mid">50 / 100(暫定)</span></h3><p>B規模波動很大,從-0.82到-8.87不等,2024年投資力道明顯放大,2025年轉為罕見正值。以僅5個數據點來看,看不出穩定的投資節奏。</p></div>
+  <div class="rule-card"><h3>規則三・B 投資效益分析 <span class="rule-score low">35 / 100</span></h3><p>4組樣本中僅1組成功,最近兩次投資都未能推升隔年A,近期投資轉化效果不佳。</p></div>
+  <div class="rule-card"><h3>規則四・C 融資活動合理性 <span class="rule-score">65 / 100</span></h3><p>5年中A從未出現負值,最高警戒訊號未觸發。但2022年出現值得留意的財務壓力訊號——當年A僅3.35,C卻高達-9.39(推測是高額股利發放),導致期末現金餘額單年蒸發65%,顯示公司當年動用過去累積的現金儲備支應股利。2025年C(-5.72)同樣接近當年A,顯示高配息率政策。</p></div>
+  <div class="rule-card"><h3>規則五・A &gt; D 現金流品質 <span class="rule-score mid">45 / 100</span></h3><p>5年中2年通過,40%。多數年度A與D相當接近但A略低,不算嚴重疑慮,但也稱不上紮實,屬中等偏弱表現。</p></div>
+  <div class="rule-card"><h3>規則六・E 期末現金餘額穩定性 <span class="rule-score mid">55 / 100</span></h3><p>2022年驟降至3.57後,後續三年半呈現穩定復甦軌跡(3.93→5.47→6.34→6.39),顯示公司財務體質具備一定的自我修復能力。</p></div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">45</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">50</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">35</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">65</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">45</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">55</div></div>
+  </div>
+  <div class="total-score"><div class="v">49.2%</div><div class="l">六項平均總分・低於門檻・樣本數僅5年,可信度受限</div></div>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+  <div class="callout">力領科技主要經營車用顯示器驅動晶片,與矽創電子(Sitronix)關係密切。2023年12月20日才上櫃,是分析過的股票中上市櫃時間最短的公司。目前股價178元,本益比13.67倍,是估值最低的一次。</div>
+  <div class="metric-grid">
+    <div class="metric"><div class="l">股價(8/12)</div><div class="v">178</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">13.67</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">13.02</div></div>
+    <div class="metric"><div class="l">當季EPS(Q2)</div><div class="v">3.27</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">44.04</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">4.00</div></div>
+    <div class="metric"><div class="l">殖利率</div><div class="v">5.67%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">213 / 136.5</div></div>
+  </div>
+  <p class="snap-note">資料來源:鉅亨網-力領科技總覽(查詢時間2026/8/12)</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司背景</h3>
+  <p>力領科技股份有限公司(FORCELEAD TECHNOLOGY CORP.),2009年12月11日成立,2023年12月20日上櫃,資本額4.2億元。董事長毛穎文,總經理郭文源。主要經營業務為多樣化整合型的車用顯示器驅動晶片之研發、設計及銷售。年股利10.00元,殖利率5.67%,採取高配息政策,與第一步觀察到的財務型態完全吻合。</p>
+  <div class="callout">力領2009年成立但直到2023年底才上櫃,現金流量表可查詢的完整年度數據自然有限,呼應第一步分析時特別提醒的樣本數限制。</div>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>法說會資料深入討論</h2>
+  <div class="callout">力領科技的核心身份是矽創電子(Sitronix)在2021年分割出來的車用面板驅動IC事業部,矽創目前仍持股55.8%,董事長毛穎文本人就是矽創董事長親自兼任。但2025年營收年減9.4%,獲利同步下滑,呼應第一步觀察到的A從2023年高點持續下滑的疑慮。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">產品線與客戶結構</h3>
+  <p>力領科技為專業IC設計公司(Fabless模式),產品線涵蓋車用顯示器驅動IC、工控/AIoT顯示器驅動IC、客製化/OLED/ASIC顯示器驅動IC及電源倍壓IC。2025年車用占88.96%、工控占11.04%。客戶集中度中等,2024年主要銷貨客戶A、C、B公司占比分別約22.18%、17.02%、15.74%。公司法說揭露車廠客戶營收分布為中系50%、歐系(含韓系)30%、美系20%——對中國車廠市場有相當高的曝險。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">競爭護城河</h3>
+  <p>高進入門檻的車用產業特性:驗證期長、客製化、符合AEC-Q100及IATF16949規範、廣泛的專利佈局,建立了堅實的競爭護城河。力領在電子旋鈕擁有不小的市占率,與主攻中控台市場的同業奇景、聯詠有所區隔。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">2025年挑戰與2026年展望</h3>
+  <p>2025年累積營收年減9.4%,年度EPS較2024年下降,顯示過去一年整體營運面臨挑戰。存貨週轉天數改善:4Q25降至92天,為近期季度低點,有助釋放營運資金。公司法說會樂觀看待三大產品線,車用前裝市場過去三年累積一定案量,明年會逐步開花結果,車用後裝市場市占率也擴大,並推出高性價比TDDI。前裝市場智慧座艙新案能否改變過去衰退趨勢,是未來股價成長的關鍵因素。</p>
+  <div class="callout warn">前裝市場設計案的時間落差是理解這家公司的關鍵——現在看到的營收疲軟,可能是舊案量縮減與新案量尚未放量之間的空窗期,反映車用半導體產業典型的長認證週期特性。</div>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近11個月)</h2>
+  <div class="callout">呈現「觸底回升」的軌跡——2025年7-9月連續三個月年減,是最疲弱階段;10月起轉為年增,2026年2月出現單月低點後,3月起連續加速成長,5月營收3.00億創11個月新高、年增高達66.14%,呼應第3步「前裝市場新案逐步開花結果」的說法。</div>
+  <div class="chart-wrap">
+    <svg viewBox="0 0 860 380" style="width:100%;height:auto;" role="img" aria-label="力領科技近11個月月營收長條圖">
+      <line x1="60" y1="320" x2="800" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="251.4" x2="800" y2="251.4" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="182.9" x2="800" y2="182.9" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="114.3" x2="800" y2="114.3" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="255.4" text-anchor="end" font-size="11" fill="#8B93A0">1</text>
+      <text x="50" y="186.9" text-anchor="end" font-size="11" fill="#8B93A0">2</text>
+      <text x="50" y="118.3" text-anchor="end" font-size="11" fill="#8B93A0">3</text>
+
+      <rect x="73"  y="188.4" width="48" height="131.6" rx="3" fill="#378ADD"/><text x="97" y="182.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">1.92</text><text x="97" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+      <rect x="139" y="167.1" width="48" height="152.9" rx="3" fill="#378ADD"/><text x="163" y="161.1" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.23</text><text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+      <rect x="205" y="152.7" width="48" height="167.3" rx="3" fill="#378ADD"/><text x="229" y="146.7" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.44</text><text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+      <rect x="271" y="136.9" width="48" height="183.1" rx="3" fill="#378ADD"/><text x="295" y="130.9" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.67</text><text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+      <rect x="337" y="143.0" width="48" height="177.0" rx="3" fill="#378ADD"/><text x="361" y="137.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.58</text><text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/11</text>
+      <rect x="403" y="137.6" width="48" height="182.4" rx="3" fill="#378ADD"/><text x="427" y="131.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.66</text><text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+      <rect x="469" y="141.0" width="48" height="179.0" rx="3" fill="#378ADD"/><text x="493" y="135.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.61</text><text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+      <rect x="535" y="189.7" width="48" height="130.3" rx="3" fill="#D4537E"/><text x="559" y="183.7" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">1.90</text><text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+      <rect x="601" y="135.6" width="48" height="184.4" rx="3" fill="#378ADD"/><text x="625" y="129.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.69</text><text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+      <rect x="667" y="123.9" width="48" height="196.1" rx="3" fill="#378ADD"/><text x="691" y="117.9" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">2.86</text><text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+      <rect x="733" y="114.3" width="48" height="205.7" rx="3" fill="#EDA100"/><text x="757" y="108" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">3.00</text><text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">26/05</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近11期新高　粉色=近11期低點</div>
+  </div>
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th></tr></thead>
+    <tbody><tr><td class="label">年增%</td><td class="trough">-27.0%</td><td>-16.8%</td><td>-3.9%</td><td>+15.1%</td><td>-0.0%</td><td>+13.7%</td><td>+32.1%</td><td>-2.3%</td><td>+15.8%</td><td>+13.3%</td><td class="peak">+66.1%</td></tr></tbody>
+  </table>
+  <p class="snap-note">資料來源:Yahoo股市-力領科技營收表、nStock(查詢時間2026/8/12)。搜尋結果未查到2026年6-7月數字,建議自行至Goodinfo或Yahoo股市確認最新月份。</p>
+  <p>三個階段清楚可辨:2025年7-9月是全公司近期最疲弱的谷底;10月-2026年2月呈現「觸底整理」的震盪格局;3-5月轉為連續加速成長,5月一舉衝上+66.14%,創11個月營收新高。這對第一步的疑慮提供正面補充——最新營收動能顯示公司可能已開始走出2025年的谷底。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>本益比評估(無正式法人覆蓋)</h2>
+  <div class="callout warn">力領科技與錼創科技(6854)相似,目前查無FactSet或主要券商的正式EPS預估與目標價。但兩者體質截然不同——力領是穩定獲利、持續配發股利的成熟型公司,不是燒錢的故事股。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司自行揭露的成長動能(非第三方法人預測)</h3>
+  <p>力領2025至2028年的主要成長動能可歸納為:智慧座艙與車聯網帶動車內顯示器數量倍增與規格升級,公司引用IEK預測2023至2030年智慧座艙及車聯網相關顯示需求年複合成長約12%;HUD、乘客螢幕、電子後視鏡為2026年高增速應用,公司引用Omdia資料估2026年HUD、乘客螢幕、電子後視鏡數量成長分別為21.1%、20.1%、15.0%。公司2027至2028年具體財測並未公開,以上僅為依已揭露產品線與產業趨勢推估的方向性資訊。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">本益比評估(無前瞻預估,僅呈現現況)</h3>
+  <table>
+    <thead><tr><th>項目</th><th>數值</th></tr></thead>
+    <tbody>
+      <tr><td class="label">目前股價</td><td>178元</td></tr>
+      <tr><td class="label">近四季EPS(TTM)</td><td>13.02元</td></tr>
+      <tr><td class="label">目前本益比</td><td><b>13.67倍</b></td></tr>
+      <tr><td class="label">2025年全年EPS</td><td>12.15元(年減41%)</td></tr>
+      <tr><td class="label">2024年全年EPS(前一波高點)</td><td>20.62元</td></tr>
+    </tbody>
+  </table>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">目標本益比法試算(以TTM EPS 13.02元為基準)</h3>
+  <table>
+    <thead><tr><th>假設本益比</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">15倍</td><td>195.3元</td></tr>
+      <tr><td class="label">18倍(同業中位數區間)</td><td>234.4元</td></tr>
+      <tr><td class="label">20倍(樂觀情境)</td><td>260.4元</td></tr>
+    </tbody>
+  </table>
+  <div class="callout danger">
+    <b>不確定性揭露</b>:這次的核心不確定性不是法人估值分歧,而是根本沒有第三方專業機構的獨立驗證。第4步觀察到5月營收年增66.14%的強勁反彈,若延續到下半年,理論上有機會推升全年EPS重返甚至超越2024年20.62元的水準,但這僅是根據現有零星資訊的合理推測,沒有任何法人模型可以交叉驗證。建議持續關注月營收數字的實際表現,作為驗證公司「開花結果」說法是否兌現的第一手依據。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+  <div class="callout warn"><b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。</div>
+  <div class="callout"><b>核心切入點</b>:力領科技是七次分析中風險輪廓最「安靜」的一次——沒有搜索事件、沒有懸崖式營收崩落、沒有業外收益疑慮,而是一家穩定獲利、持續配息、但規模太小以至於沒有法人願意花心思覆蓋的利基型公司。決策核心張力在於「便宜」與「資訊不透明」之間的取捨。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>會考慮小量分批進場。現金流體質的疑慮更多來自樣本數不足而非實質惡化,商業模式相對簡單、可理解(Fabless IC設計、車用顯示驅動IC利基市場、與矽創母公司的穩固關係、AEC-Q100等高進入門檻)。估值是七次分析中最便宜的一次(13.67倍本益比),第4步觀察到5月營收年增66.14%的強勁反彈,若延續,目前的低本益比可能提供不錯的風險報酬比。但缺乏法人覆蓋代表沒有第三方持續驗證公司說法,加上中系客戶占比50%的地緣政治曝險,建議用小量部位測試,而非重壓。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向續抱,這是七次分析中最沒有明確「應該賣出」理由的一次。沒有出現任何治理疑慮、資產減損、業外收益灌水這類需要警惕的訊號。高配息政策(殖利率5-7%)本身就是持續的股東回報機制。只要月營收持續維持復甦軌跡,沒有必要因「法人沒有覆蓋」這個理由恐慌性出清一家基本面穩健的公司。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">6-7月營收是否延續5月的強勁復甦,或曇花一現</td><td>2026年8月中旬</td><td class="label">若連續維持雙位數以上年增,支持「前裝新案開花結果」的說法</td></tr>
+      <tr><td class="label">Q2/Q3財報EPS是否延續回升軌跡,重返2024年20.62元水準</td><td>8月中旬(Q2)、11月(Q3)</td><td class="label">若明顯回升,目前13.67倍本益比會顯得更便宜</td></tr>
+      <tr><td class="label">中國車市景氣與政策動向(國產替代、關稅、補貼)</td><td>持續關注</td><td class="label">力領中系客戶曝險達50%,政策轉折可能直接影響營收能見度</td></tr>
+      <tr><td class="label">是否有券商開始正式發布EPS預估或目標價</td><td>不定期</td><td class="label">若開始有法人覆蓋,通常伴隨股價重新評價的機會</td></tr>
+      <tr><td class="label">矽創電子(母公司)是否有策略性動作</td><td>不定期(依公告)</td><td class="label">矽創的動向對力領的長期策略方向具有指標意義</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-12　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = document.getElementById(link.getAttribute('href').substring(1));
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+  var sections = links.map(function(link){ return document.getElementById(link.getAttribute('href').substring(1)); }).filter(Boolean);
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
