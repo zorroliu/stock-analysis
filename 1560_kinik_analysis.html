@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中砂(1560) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14; --surface:#131A21; --ink:#E7ECEF; --ink-soft:#9AA7B0; --ink-mute:#6B7680; --border:#232B33;
+  --navy:#17202B; --navy-deep:#0B0F14; --teal:#34D399; --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171; --red-bg:rgba(248,113,113,0.12); --amber:#FBBF24; --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6; --pink-bg:rgba(244,114,182,0.12); --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC',sans-serif;line-height:1.7;padding-bottom:6rem;}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+header{background:var(--navy-deep);color:#F4F1E8;padding:2.5rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border);}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;background:rgba(52,211,153,0.15);color:#6EE7B7;font-size:13px;border:1px solid rgba(52,211,153,0.3);}
+.stepnav{position:sticky;top:0;z-index:50;background:rgba(11,15,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);display:flex;justify-content:center;flex-wrap:wrap;padding:.6rem 1rem;gap:.4rem;}
+.stepnav a{font-size:13px;padding:.45rem .9rem;border-radius:20px;color:var(--ink-soft);text-decoration:none;border:1px solid transparent;white-space:nowrap;}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+.step-eyebrow{font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+.callout{border-left:4px solid var(--teal);background:var(--surface);border-radius:0 10px 10px 0;padding:1rem 1.3rem;margin-bottom:1.5rem;font-size:15px;}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;} .neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--teal-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--teal);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+.signal-table td.label{white-space:normal;}
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TWSE : 1560</div>
+  <h1>中國砂輪企業股份有限公司</h1>
+  <div class="sub">KINIK COMPANY　個股初步分析報告　生成日期 2026/08/11</div>
+  <div class="alert">✓ 現金流盲測分數76.0%,六次分析中最高;現金流體質非常紮實</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ 法說會深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 本益比預估</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+  <div class="callout">
+    <b>總分 76.0%,六次分析中最高分。</b>規則四(融資合理性)、規則五(現金流品質)雙雙達到90分,A十年來從未轉負,獲利品質相當紮實,可以放心繼續往下分析。
+  </div>
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2016</td><td class="pos">7.95</td><td class="neg">-4.25</td><td class="neg">-5.42</td><td>6.44</td><td>3.9</td></tr>
+      <tr><td class="label">2017</td><td class="pos">9.38</td><td class="neg">-3.62</td><td class="neg">-5.63</td><td>8.72</td><td>4.02</td></tr>
+      <tr><td class="label">2018</td><td class="pos">7</td><td class="neg">-8.73</td><td class="pos">+1.73</td><td>8.73</td><td>4.23</td></tr>
+      <tr><td class="label">2019</td><td class="pos">9.97</td><td class="neg">-16.2</td><td class="pos">+8.85</td><td>6.86</td><td>7.07</td></tr>
+      <tr><td class="label">2020</td><td class="pos">9.71</td><td class="trough">-19.3</td><td class="pos">+9.75</td><td>6.84</td><td>7.14</td></tr>
+      <tr><td class="label">2021</td><td class="pos">12.6</td><td class="pos">+0.2</td><td class="neg">-0.31</td><td>8.86</td><td>19.2</td></tr>
+      <tr><td class="label">2022</td><td class="pos">19.5</td><td class="neg">-4.85</td><td class="trough">-22.8</td><td>15.6</td><td>11.3</td></tr>
+      <tr><td class="label">2023</td><td class="pos">12.9</td><td class="neg">-9.37</td><td class="neg">-4.89</td><td>10.6</td><td>9.92</td></tr>
+      <tr><td class="label">2024</td><td class="pos">16.2</td><td class="neg">-4.62</td><td class="neg">-1.73</td><td>12.9</td><td class="peak">20</td></tr>
+      <tr><td class="label">2025</td><td class="peak">19.1</td><td class="trough">-19.1</td><td class="neg">-4.62</td><td>16.6</td><td>15.7</td></tr>
+      <tr><td class="label">26Q1(單季,僅供參考)</td><td class="pos">4.68</td><td class="neg">-5.82</td><td class="pos">+3.19</td><td>5.32</td><td>17.7</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。2012-2015因年代較久僅供參考不列入計分。</p>
+
+  <div class="rule-card"><h3>規則一・A 逐年成長趨勢 <span class="rule-score">78 / 100</span></h3><p>A從2016年的7.95,到2025年成長至19.1,十年間規模超過翻倍,展現清楚的長期成長軌跡。近三年(2023-2025)呈現12.9→16.2→19.1的穩定攀升,是六次分析中方向最一致的成長型態。</p></div>
+  <div class="rule-card"><h3>規則二・B 投資紀律評估 <span class="rule-score mid">55 / 100(暫定)</span></h3><p>B規模波動較大,從-3.62到-19.3不等,2019、2020、2025三個年度出現明顯放大的投資支出。整體屬於「時緊時鬆」型,細項未取得前無法確認資本支出性質。</p></div>
+  <div class="rule-card"><h3>規則三・B 投資效益分析 <span class="rule-score">68 / 100</span></h3><p>近三年(2023-2025)投資轉化效果連續成功,是六次分析中近期表現最穩定的一次。</p></div>
+  <div class="rule-card"><h3>規則四・C 融資活動合理性 <span class="rule-score high">90 / 100</span></h3><p>過去10年A從未出現過負值,最高警戒訊號完全沒有觸發過,是六次分析中唯一達到這個水準的案例。C的正負分布合理反映不同階段的財務操作(舉債擴產、發放股利)。</p></div>
+  <div class="rule-card"><h3>規則五・A &gt; D 現金流品質 <span class="rule-score high">90 / 100</span></h3><p>10年中9年通過,90%!六次分析中現金流品質最紮實的案例之一,僅2018年小幅未通過。</p></div>
+  <div class="rule-card"><h3>規則六・E 期末現金餘額穩定性 <span class="rule-score">75 / 100</span></h3><p>E從2016年的3.9,成長至2025年的15.7,十年間成長超過4倍,長期趨勢清楚向上,近幾年呈現「高檔震盪」但未偏離向上軌跡。</p></div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">78</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">55</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">68</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">90</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">90</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">75</div></div>
+  </div>
+  <div class="total-score"><div class="v">76.0%</div><div class="l">六項平均總分・六次分析中最高・現金流體質非常紮實</div></div>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+  <div class="callout">股價 <b>687元</b>(2026/8/11收盤,-0.15%),本益比 <b>66.94倍</b>,評價明顯偏貴;近四季EPS 10.26元,7月營收年增26.56%。</div>
+  <div class="metric-grid">
+    <div class="metric"><div class="l">收盤價(8/11)</div><div class="v">687</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">66.94</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">10.26</div></div>
+    <div class="metric"><div class="l">當季EPS(Q1)</div><div class="v">2.94</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">42.56</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">16.14</div></div>
+    <div class="metric"><div class="l">殖利率</div><div class="v">0.72%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">790 / 297</div></div>
+  </div>
+  <p class="snap-note">資料來源:鉅亨網-中砂總覽(查詢時間2026/8/11)</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司背景與營運</h3>
+  <p>中國砂輪企業股份有限公司(KINIK COMPANY),1964年成立,2004年上市,資本額15.03億元。董事長林伯全,主要經營各種研磨品、切削刀具製造加工經銷及代理研磨加工、再生晶圓等業務。2026年7月營收8.86億元,月增6.41%,年增26.56%;7月累計營收56.72億元,累計年增23.56%。2025年全年營收81.50億元。近期公司公告調整配息率,可能與保留資金支應擴產資本支出有關。</p>
+  <div class="callout">這與第一步的良好體質相互呼應:規則四、五雙雙達到90分,顯示中砂長年累積的現金流體質確實支撐了公司具備擴產的財務基礎,不像故事型公司那樣需要仰賴頻繁募資才能維持營運。</div>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>法說會資料深入討論</h2>
+  <div class="callout">中砂的成長故事建立在三大事業部同步擴產上——鑽石碟(先進製程用)、再生晶圓(高階客戶需求強勁)、砂輪(併購日本MKS、泰國MGT)。董事長喊出2027年營收挑戰百億元目標,依目前訂單熱度可能提前於2026年達標。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">鑽石碟事業部(DBU)</h3>
+  <p>鑽石碟事業部已於2025年第三季開始小量出貨給美系新IDM大客戶,預計2026年逐步放量。2026年目標為Q2至Q3間將月產能提升至6萬顆,下半年視市況有機會再提升至6.5萬顆/月。中砂鑽石碟與台系晶圓代工大廠合作密切,受惠客戶5奈米、3奈米與2奈米產能滿載。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">晶圓事業部(SBU)</h3>
+  <p>晶圓事業部產能擴充進度提前,原訂2026年第三季底達成的12吋總產能40萬片/月目標,已提前至Q2就增至36萬片/月,並力拼6月底達到40萬片/月。新增產能全部用於先進製程客戶所需的高階再生晶圓。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">百億營收目標</h3>
+  <p>董事長林伯全喊出年度營收規模很快邁向百億元的目標,並透露未來兩大投資方向:興建再生晶圓新廠、更新鑽石碟廠房。去年業績已突破80億元大關,並將日本MKS及泰國MGT納入旗下,延伸至東北亞及東南亞。因應AI帶動半導體需求提升,鑽石碟、再生晶圓已啟動擴產,法人預估中砂今年營收將挑戰百億元大關,較原訂2027年目標提前一年。</p>
+  <div class="callout">產業敘事與實際數字一致性高:具體產能數字(月產能5萬顆→6萬顆鑽石碟,12吋晶圓33萬片→40萬片)與明確客戶指向(台積電先進製程、美系IDM大廠),大幅降低了故事「純屬想像」的風險。</div>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近13個月)</h2>
+  <div class="callout">六次分析中最平穩、波動最小的一張營收圖——每個月都維持雙位數年增率,近5個月(3-7月)連續墊高,7月創13個月新高8.86億元。</div>
+  <div class="chart-wrap">
+    <svg viewBox="0 0 950 380" style="width:100%;height:auto;" role="img" aria-label="中砂近13個月月營收長條圖">
+      <line x1="60" y1="320" x2="930" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="272" x2="930" y2="272" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="224" x2="930" y2="224" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="176" x2="930" y2="176" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="128" x2="930" y2="128" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="276" text-anchor="end" font-size="11" fill="#8B93A0">2</text>
+      <text x="50" y="228" text-anchor="end" font-size="11" fill="#8B93A0">4</text>
+      <text x="50" y="180" text-anchor="end" font-size="11" fill="#8B93A0">6</text>
+      <text x="50" y="132" text-anchor="end" font-size="11" fill="#8B93A0">8</text>
+
+      <rect x="73"  y="152" width="48" height="168" rx="3" fill="#378ADD"/><text x="97" y="146" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.00</text><text x="97" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+      <rect x="139" y="154.4" width="48" height="165.6" rx="3" fill="#D4537E"/><text x="163" y="148.4" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">6.90</text><text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+      <rect x="205" y="152.5" width="48" height="167.5" rx="3" fill="#378ADD"/><text x="229" y="146.5" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">6.98</text><text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+      <rect x="271" y="150.1" width="48" height="169.9" rx="3" fill="#378ADD"/><text x="295" y="144.1" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.08</text><text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+      <rect x="337" y="145.5" width="48" height="174.5" rx="3" fill="#378ADD"/><text x="361" y="139.5" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.27</text><text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/11</text>
+      <rect x="403" y="143.4" width="48" height="176.6" rx="3" fill="#378ADD"/><text x="427" y="137.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.36</text><text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+      <rect x="469" y="139.3" width="48" height="180.7" rx="3" fill="#378ADD"/><text x="493" y="133.3" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.53</text><text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+      <rect x="535" y="139.8" width="48" height="180.2" rx="3" fill="#378ADD"/><text x="559" y="133.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.51</text><text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+      <rect x="601" y="130.6" width="48" height="189.4" rx="3" fill="#378ADD"/><text x="625" y="124.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">7.89</text><text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+      <rect x="667" y="120.8" width="48" height="199.2" rx="3" fill="#378ADD"/><text x="691" y="114.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">8.30</text><text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+      <rect x="733" y="121.0" width="48" height="199.0" rx="3" fill="#378ADD"/><text x="757" y="115.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">8.29</text><text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/05</text>
+      <rect x="799" y="120.1" width="48" height="199.9" rx="3" fill="#378ADD"/><text x="823" y="114.1" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">8.33</text><text x="823" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/06</text>
+      <rect x="865" y="107.4" width="48" height="212.6" rx="3" fill="#EDA100"/><text x="889" y="101" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">8.86</text><text x="889" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">26/07</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近13期新高　粉色=近13期低點</div>
+  </div>
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th><th>26/06</th><th>26/07</th></tr></thead>
+    <tbody><tr><td class="label">年增%</td><td>+10.3%</td><td class="trough">+17.6%</td><td>+9.5%</td><td>+19.4%</td><td>+19.2%</td><td>+16.7%</td><td>+33.1%</td><td>+24.4%</td><td>+31.2%</td><td>+18.8%</td><td>+17.8%</td><td>~+16.4%</td><td class="peak">+26.6%</td></tr></tbody>
+  </table>
+  <p class="snap-note">資料來源:Yahoo股市-中砂營收表、Win投資(查詢時間2026/8/11,26/06為累計數字推算)</p>
+  <p>沒有出現懸崖式下滑或技術性凹陷,取而代之的是相對平順、逐步墊高的成長曲線。2026年1月起年增率明顯放大,3-7月營收站穩7.9-8.9億元的新台階,與法說會提到的擴產進度提前高度吻合。前7月累計營收56.72億元,若後5個月維持相近水準,全年總營收有機會落在98-102億元,支持法人「今年就挑戰百億元」的預估相當具體可信。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>前瞻本益比 / EPS 預估</h2>
+  <div class="callout warn">六次分析中唯一出現「目前股價已經超過所有找到的法人目標價」的案例——FactSet最新目標價中位數530元、個別券商目標價210-610元之間,但目前股價687元,已經明顯高於所有查到的目標價區間上緣。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">FactSet法人共識演變軌跡</h3>
+  <table>
+    <thead><tr><th>調查時間</th><th>2026年EPS中位數</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2025/12</td><td>(2025年)8.7元</td><td>380元</td></tr>
+      <tr><td class="label">2026/3</td><td>12.57元</td><td>500元</td></tr>
+      <tr><td class="label">2026/4</td><td>12.57元</td><td>530元</td></tr>
+      <tr><td class="label">2026/5/4</td><td><b>12.91元</b></td><td><b>530元</b></td></tr>
+    </tbody>
+  </table>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">前瞻本益比</h3>
+  <table>
+    <thead><tr><th>基準</th><th>預估EPS</th><th>前瞻本益比(現價687元)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年</td><td>12.91元</td><td><b>53.2倍</b></td></tr>
+      <tr><td class="label">2027年</td><td>16.15元</td><td><b>42.5倍</b></td></tr>
+      <tr><td class="label">2028年</td><td>20.18元(單一估計)</td><td><b>34.0倍</b></td></tr>
+    </tbody>
+  </table>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">目標本益比法試算(2027年EPS 16.15元)</h3>
+  <table>
+    <thead><tr><th>假設本益比</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">30倍(保守)</td><td>484.5元</td></tr>
+      <tr><td class="label">40倍(中性)</td><td>646元</td></tr>
+      <tr><td class="label">50倍(樂觀)</td><td>807.5元</td></tr>
+    </tbody>
+  </table>
+  <div class="callout danger">
+    <b>不確定性揭露</b>:個別券商目標價(500-610元)均低於目前股價687元。可能原因:(1)市場提前反映法人尚未更新的樂觀預期,例如百億營收目標可能提前達標;(2)股價已計入過度樂觀預期,存在回檔修正風險。建議持續留意是否有更新法人報告,以及股價是否隨營收動能持續走高而讓法人再度上修目標價。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+  <div class="callout warn"><b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。</div>
+  <div class="callout"><b>核心切入點</b>:中砂是六次分析中「體質最好、但估值壓力也最明確」的一次——現金流盲測分數最高(76.0%)、營收成長平穩且與擴產敘事高度吻合、法人共識一致且持續上修,但股價687元已經超越所有查到的法人目標價。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>不會現在追高進場,會等待更好的進場時機。基本面確實是六次分析中最扎實的一次,但目前價格已經反映甚至超越了樂觀情境。如果現在進場,承擔的是「市場預期能否持續加碼上修」的風險,而不是「便宜買進優質公司」的機會。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向續抱但保持警覺,可考慮逢高分批獲利了結部分部位。基本面沒有出現任何惡化訊號,但既然股價已經跑在法人目標價之前,續抱的邏輯需要建立在「相信下一輪法人上修目標價會持續跟上股價」這個假設上。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年全年營收是否提前達成百億元目標</td><td>2027年初</td><td class="label">若如期或提前達標,支持目前股價的樂觀定價</td></tr>
+      <tr><td class="label">FactSet目標價是否延續上修軌跡追上現價</td><td>每月法人預估更新</td><td class="label">若目標價停滯不前,股價與基本面預期的落差將擴大</td></tr>
+      <tr><td class="label">2026Q2/Q3財報EPS是否維持雙位數成長</td><td>8月中旬、11月</td><td class="label">若成長放緩,66.9倍本益比的評價壓力將顯著上升</td></tr>
+      <tr><td class="label">鑽石碟月產能、晶圓12吋產能是否如期達標</td><td>每季法說會</td><td class="label">具體產能數字未達標,是成長故事出現裂縫的早期訊號</td></tr>
+      <tr><td class="label">台積電先進製程量產進度與良率</td><td>每季</td><td class="label">中砂高度仰賴台積電訂單,進度放緩將直接影響能見度</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-11　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = document.getElementById(link.getAttribute('href').substring(1));
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+  var sections = links.map(function(link){ return document.getElementById(link.getAttribute('href').substring(1)); }).filter(Boolean);
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
