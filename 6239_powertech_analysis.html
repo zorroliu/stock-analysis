@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>力成(6239) 個股初步分析報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0F14; --surface:#131A21; --ink:#E7ECEF; --ink-soft:#9AA7B0; --ink-mute:#6B7680; --border:#232B33;
+  --navy:#17202B; --navy-deep:#0B0F14; --teal:#34D399; --teal-bg:rgba(52,211,153,0.12);
+  --red:#F87171; --red-bg:rgba(248,113,113,0.12); --amber:#FBBF24; --amber-bg:rgba(251,191,36,0.12);
+  --pink:#F472B6; --pink-bg:rgba(244,114,182,0.12); --locked:#4B5563;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC',sans-serif;line-height:1.7;padding-bottom:6rem;}
+h1,h2,h3{font-family:'Noto Serif TC',serif;font-weight:700;color:var(--ink);}
+header{background:var(--navy-deep);color:#F4F1E8;padding:2.5rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border);}
+header .ticker{font-family:'Roboto Mono',monospace;font-size:14px;letter-spacing:2px;color:#9FB3C8;margin-bottom:.5rem;}
+header h1{color:#fff;font-size:32px;margin-bottom:.3rem;}
+header .sub{color:#B9C5D3;font-size:14px;}
+header .alert{display:inline-block;margin-top:1rem;padding:.5rem 1rem;border-radius:8px;background:rgba(52,211,153,0.15);color:#6EE7B7;font-size:13px;border:1px solid rgba(52,211,153,0.3);}
+.stepnav{position:sticky;top:0;z-index:50;background:rgba(11,15,20,0.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);display:flex;justify-content:center;flex-wrap:wrap;padding:.6rem 1rem;gap:.4rem;}
+.stepnav a{font-size:13px;padding:.45rem .9rem;border-radius:20px;color:var(--ink-soft);text-decoration:none;border:1px solid transparent;white-space:nowrap;}
+.stepnav a.active{background:var(--teal);color:#062B22;}
+.stepnav a:not(.active):hover{border-color:var(--border);background:#1A222B;}
+main{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem;}
+section{margin-bottom:3.5rem;scroll-margin-top:70px;}
+.step-eyebrow{font-family:'Roboto Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--teal);text-transform:uppercase;margin-bottom:.4rem;}
+section h2{font-size:24px;margin-bottom:1.2rem;}
+.callout{border-left:4px solid var(--teal);background:var(--surface);border-radius:0 10px 10px 0;padding:1rem 1.3rem;margin-bottom:1.5rem;font-size:15px;}
+.callout b{color:var(--ink);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.2rem;font-size:14px;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+th,td{padding:.6rem .7rem;text-align:center;border-bottom:1px solid var(--border);}
+th{background:var(--navy);color:var(--ink);font-weight:500;font-size:13px;}
+tr:last-child td{border-bottom:none;}
+td.label{text-align:left;color:var(--ink-soft);font-weight:500;}
+.pos{color:var(--teal);font-weight:700;} .neg{color:var(--red);font-weight:700;}
+.peak{background:var(--amber-bg);color:var(--amber);font-weight:700;}
+.trough{background:var(--pink-bg);color:var(--pink);font-weight:700;}
+.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;}
+.rule-card h3{font-size:16px;margin-bottom:.5rem;display:flex;align-items:center;gap:.6rem;}
+.rule-score{font-family:'Roboto Mono',monospace;font-size:13px;font-weight:700;padding:.15rem .6rem;border-radius:20px;background:var(--teal-bg);color:var(--teal);}
+.rule-score.mid{background:var(--amber-bg);color:var(--amber);}
+.rule-score.low{background:var(--red-bg);color:var(--red);}
+.rule-score.high{background:var(--teal-bg);color:var(--teal);}
+.score-summary{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:1.5rem 0;}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;min-width:90px;}
+.score-tile .n{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-mute);}
+.score-tile .v{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.total-score{text-align:center;margin:1.5rem 0;padding:1.5rem;background:var(--teal-bg);border-radius:14px;}
+.total-score .v{font-family:'Noto Serif TC',serif;font-size:44px;color:var(--teal);font-weight:700;}
+.total-score .l{font-size:14px;color:var(--ink-soft);margin-top:.2rem;}
+.snap-note{font-size:12.5px;color:var(--ink-mute);margin:.4rem 0 1rem;}
+.snap-note a{color:var(--teal);}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1rem 0 1.5rem;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+.metric .l{font-size:12px;color:var(--ink-mute);margin-bottom:.2rem;}
+.metric .v{font-family:'Roboto Mono',monospace;font-size:19px;font-weight:700;color:var(--ink);}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1rem .5rem;margin-bottom:1rem;}
+.signal-table td.label{white-space:normal;}
+footer{text-align:center;color:var(--ink-mute);font-size:12px;padding:2rem 1rem 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ticker">TWSE : 6239</div>
+  <h1>力成科技股份有限公司</h1>
+  <div class="sub">POWERTECH TECHNOLOGY INC.　個股初步分析報告　生成日期 2026/08/13</div>
+  <div class="alert">✓ 現金流盲測規則五10年全數通過,獲利品質近乎完美,詳見第1步</div>
+</header>
+
+<nav class="stepnav">
+  <a href="#step1" data-step="1">① 現金流量分析</a>
+  <a href="#step2" data-step="2">② 基本資訊</a>
+  <a href="#step3" data-step="3">③ 法說會深入</a>
+  <a href="#step4" data-step="4">④ 營收趨勢</a>
+  <a href="#step5" data-step="5">⑤ 本益比預估</a>
+  <a href="#step6" data-step="6">⑥ 投資決策</a>
+</nav>
+
+<main>
+
+<section id="step1">
+  <div class="step-eyebrow">第 1 步 / 共 6 步</div>
+  <h2>現金流量表六大規則分析(盲測)</h2>
+  <div class="callout">
+    <b>總分 64.7%,屬「良好」等級。</b>規則五(現金流品質)10年全數通過,獲利品質近乎完美。2025年是明顯轉折年度:A明顯下滑、B創史上最大投資規模、C轉為罕見正值、E大幅蒸發,四訊號同時出現,值得在後續步驟確認具體背景。
+  </div>
+  <table>
+    <thead><tr><th>年度</th><th>A 營業活動</th><th>B 投資活動</th><th>C 融資活動</th><th>D 稅前淨利</th><th>E 期末餘額</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2016</td><td class="trough">129</td><td class="pos">-160</td><td class="pos">-6.91</td><td>72.6</td><td class="trough">158</td></tr>
+      <tr><td class="label">2017</td><td class="pos">177</td><td class="neg">-188</td><td class="peak">+34.5</td><td>88.9</td><td>177</td></tr>
+      <tr><td class="label">2018</td><td class="pos">202</td><td class="pos">-162</td><td class="neg">-33.8</td><td>94.4</td><td>185</td></tr>
+      <tr><td class="label">2019</td><td class="pos">180</td><td class="pos">-80.6</td><td class="neg">-62.5</td><td>85.1</td><td>218</td></tr>
+      <tr><td class="label">2020</td><td class="pos">193</td><td class="pos">-167</td><td class="neg">-30.1</td><td>104</td><td>210</td></tr>
+      <tr><td class="label">2021</td><td class="peak">246</td><td class="neg">-141</td><td class="neg">-87.2</td><td>147</td><td>226</td></tr>
+      <tr><td class="label">2022</td><td class="pos">229</td><td class="pos">-189</td><td class="neg">-67.6</td><td>136</td><td>204</td></tr>
+      <tr><td class="label">2023</td><td class="pos">197</td><td class="pos">-53</td><td class="neg">-135</td><td>120</td><td>211</td></tr>
+      <tr><td class="label">2024</td><td class="pos">216</td><td class="pos">-98.6</td><td class="neg">-114</td><td>107</td><td class="peak">222</td></tr>
+      <tr><td class="label">2025</td><td class="pos">167</td><td class="trough">-260</td><td class="pos">+42</td><td>87.9</td><td>164</td></tr>
+      <tr><td class="label">26Q2(單季,僅供參考)</td><td class="pos">101</td><td class="neg">-94.8</td><td class="pos">+4.41</td><td>68.2</td><td>176</td></tr>
+    </tbody>
+  </table>
+  <p class="snap-note">資料來源:使用者提供 Goodinfo 現金流量表截圖(單位:億元)。2014-2015因年代較久僅供參考不列入計分。</p>
+
+  <div class="rule-card"><h3>規則一・A 逐年成長趨勢 <span class="rule-score mid">55 / 100</span></h3><p>A從2016年的129持續攀升,2021年達到近10年高點246。但近三年出現轉弱訊號:2025年大幅下滑至167(較2021高點下滑32%),是2016年以來的相對低點。</p></div>
+  <div class="rule-card"><h3>規則二・B 投資紀律評估 <span class="rule-score mid">50 / 100(暫定)</span></h3><p>B規模波動明顯,2025年出現史上最大規模的投資支出(-260),遠超過去任何一年,搭配同年A明顯下滑,是值得留意的財務壓力測試點。</p></div>
+  <div class="rule-card"><h3>規則三・B 投資效益分析 <span class="rule-score mid">50 / 100</span></h3><p>9組樣本中5組成功,好壞參半,最近一次(2024→2025)投資效益明顯未能延續。</p></div>
+  <div class="rule-card"><h3>規則四・C 融資活動合理性 <span class="rule-score high">75 / 100</span></h3><p>10年中A從未出現過負值,最高警戒訊號未觸發。2025年C轉為正值(+42),搭配同年A回落、B創新高投資支出,看起來是策略性主動借款支應擴產,而非本業造血不足被迫舉債。</p></div>
+  <div class="rule-card"><h3>規則五・A &gt; D 現金流品質 <span class="rule-score high">98 / 100</span></h3><p>10年全數通過,100%!獲利品質近乎完美,即便2025年A明顯回落,帳面獲利依然完全轉化為更多的實際現金流入。</p></div>
+  <div class="rule-card"><h3>規則六・E 期末現金餘額穩定性 <span class="rule-score mid">60 / 100</span></h3><p>E從2016年的158長期成長至2024年高點222,但2025年出現十年來最大單年跌幅(-26.1%),與規則一、二觀察到的近期轉弱、投資大幅擴張互相呼應。</p></div>
+
+  <div class="score-summary">
+    <div class="score-tile"><div class="n">規則一</div><div class="v">55</div></div>
+    <div class="score-tile"><div class="n">規則二</div><div class="v">50</div></div>
+    <div class="score-tile"><div class="n">規則三</div><div class="v">50</div></div>
+    <div class="score-tile"><div class="n">規則四</div><div class="v">75</div></div>
+    <div class="score-tile"><div class="n">規則五</div><div class="v">98</div></div>
+    <div class="score-tile"><div class="n">規則六</div><div class="v">60</div></div>
+  </div>
+  <div class="total-score"><div class="v">64.7%</div><div class="l">六項平均總分・良好等級・可繼續往下分析</div></div>
+</section>
+
+<section id="step2">
+  <div class="step-eyebrow">第 2 步 / 共 6 步</div>
+  <h2>基本資訊查詢</h2>
+  <div class="callout">股價 <b>285元</b>(2026/8/13盤中,+1.42%),本益比28.26倍;2026上半年營收444億元、年增32%,稅後淨利52億元、年增91%,EPS達5.5元。第一步觀察到的2025年鉅額投資支出,是資本支出從400億元上修至500億元、佈局FOPLP先進封裝與AI/HPC需求的具體展現。</div>
+  <div class="metric-grid">
+    <div class="metric"><div class="l">股價(8/13盤中)</div><div class="v">285</div></div>
+    <div class="metric"><div class="l">本益比</div><div class="v">28.26</div></div>
+    <div class="metric"><div class="l">近四季EPS</div><div class="v">10.10</div></div>
+    <div class="metric"><div class="l">當季EPS(Q2)</div><div class="v">2.50</div></div>
+    <div class="metric"><div class="l">每股淨值</div><div class="v">73.42</div></div>
+    <div class="metric"><div class="l">股價淨值比</div><div class="v">3.89</div></div>
+    <div class="metric"><div class="l">殖利率</div><div class="v">1.60%</div></div>
+    <div class="metric"><div class="l">52週高/低</div><div class="v" style="font-size:15px;">387 / 116</div></div>
+  </div>
+  <p class="snap-note">資料來源:鉅亨網-力成總覽(查詢時間2026/8/13盤中快照)</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">公司背景與2026上半年財報</h3>
+  <p>力成科技股份有限公司(Powertech Technology Inc.),1997年成立,2004年上市,資本額75.91億元。董事長蔡篤恭,主要經營積體電路與半導體元件之測試服務、封裝服務。2026上半年合併營收444億元,年增32%,稅後淨利52億元,年增91%,EPS 5.5元,Q2單季EPS 3元,營收與毛利率均創近四年新高。因應強勁AI與HPC先進封裝需求並新增友達廠房投資,集團將2026年資本支出由原先400億元上修至500億元。</p>
+  <div class="callout warn">⚠ 這正是第一步規則二、四、六疑慮的具體解答:2025年史上最大投資規模與融資轉正,正是資本支出上修、AI/HPC先進封裝(FOPLP)產能建置的策略性擴產所致。</div>
+</section>
+
+<section id="step3">
+  <div class="step-eyebrow">第 3 步 / 共 6 步</div>
+  <h2>法說會資料深入討論</h2>
+  <div class="callout">力成的FOPLP策略目標明確——攜手超微(AMD)力拚2027年中前成為全球首家量產FOPLP AI應用的OSAT封測廠,同時與博通(Broadcom)在新加坡合資4億美元佈局CPO,目標2028年CPO量產。但為集中資源衝刺FOPLP,公司已明確暫緩HBM高頻寬記憶體新案開發。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">FOPLP核心策略與博通合資案</h3>
+  <p>力成董事長蔡篤恭在法說會中表示,公司與AMD的FOPLP合作案依原定計畫推進,有信心在2027年中前如期量產。同時將與博通於新加坡成立合資公司,共同開發FOPLP重佈線層技術,並延伸至CPO領域,預計今年底開始小量生產光引擎,明年下半年進一步整合至交換器產品。投資規模4億美元(約新台幣129億元),須取得經濟部投審司核准。分工上,台灣廠專注服務AMD,新加坡廠全力支援博通,核心技術及關鍵智慧財產由台灣掌握,目前規劃CPO瞄準2028年量產。</p>
+  <p class="snap-note">資料來源:鉅亨網、鏡週刊、TechNews科技新報、聯合新聞網</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">資源取捨:暫緩HBM</h3>
+  <p>力成2026年將積極擴張FOPLP產能,投資規模達10億美元,為配合FOPLP增產,明年將暫緩高頻寬記憶體(HBM)和CIS影像元件晶片尺寸封裝新案。DDR5 TSV互連預計2026Q4量產出貨,是相對近端可驗證的技術能力證明。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">多空觀點並陳</h3>
+  <p><b>看多論點</b>:CoWoS產能吃緊迫使部分客戶尋找第二方案,面板級封裝在面積利用率上具備先天經濟性優勢;2026Q4的DDR5 TSV量產出貨是近端可驗證證據;資本支出前置可視為搶市占的入場費。</p>
+  <p><b>看空論點</b>:記憶體業務仍佔營收46%,上一輪循環EPS曾從10元一路掉到7.48元;自由現金流已連續為負,近四季每股自由現金流達-14.78元(呼應第一步規則六觀察到的現金餘額大降);FOPLP尚未量產、良率未經客戶端驗證,HBM又暫緩開發。股價從5/29高點379元到7/30低點214.5元,劇烈震盪43%,顯示市場本身也在拉鋸。</p>
+  <p class="snap-note">資料來源:力成科技深度分析報告(vocus)</p>
+  <div class="callout warn">這不是單純的財務數字判斷,而是「傳統記憶體封測循環股」與「AI先進封裝結構性成長股」兩種身份之間的定位拉鋸戰,目前市場尚未形成一致共識。</div>
+</section>
+
+<section id="step4">
+  <div class="step-eyebrow">第 4 步 / 共 6 步</div>
+  <h2>營收趨勢視覺化(近13個月)</h2>
+  <div class="callout">清楚的「先低後高、逐步墊高」曲線——2025年7月是13個月最低點(63.93億,年增1.96%),年增率逐月放大至2026年1月的43.04%,2月季節性回落後3月起重新加速,7月創13個月新高82.73億元、年增29.4%。</div>
+  <div class="chart-wrap">
+    <svg viewBox="0 0 950 380" style="width:100%;height:auto;" role="img" aria-label="力成近13個月月營收長條圖">
+      <line x1="60" y1="320" x2="930" y2="320" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+      <line x1="60" y1="266.7" x2="930" y2="266.7" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="213.3" x2="930" y2="213.3" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="160" x2="930" y2="160" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="60" y1="106.7" x2="930" y2="106.7" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <text x="50" y="324" text-anchor="end" font-size="11" fill="#8B93A0">0</text>
+      <text x="50" y="270.7" text-anchor="end" font-size="11" fill="#8B93A0">20</text>
+      <text x="50" y="217.3" text-anchor="end" font-size="11" fill="#8B93A0">40</text>
+      <text x="50" y="164" text-anchor="end" font-size="11" fill="#8B93A0">60</text>
+      <text x="50" y="110.7" text-anchor="end" font-size="11" fill="#8B93A0">80</text>
+
+      <rect x="73"  y="149.5" width="48" height="170.5" rx="3" fill="#D4537E"/><text x="97" y="143.5" text-anchor="middle" font-size="11" fill="#F472B6" font-weight="700">63.9</text><text x="97" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/07</text>
+      <rect x="139" y="136.6" width="48" height="183.4" rx="3" fill="#378ADD"/><text x="163" y="130.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">68.8</text><text x="163" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/08</text>
+      <rect x="205" y="141.3" width="48" height="178.7" rx="3" fill="#378ADD"/><text x="229" y="135.3" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">67.0</text><text x="229" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/09</text>
+      <rect x="271" y="134.1" width="48" height="185.9" rx="3" fill="#378ADD"/><text x="295" y="128.1" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">69.7</text><text x="295" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/10</text>
+      <rect x="337" y="129.6" width="48" height="190.4" rx="3" fill="#378ADD"/><text x="361" y="123.6" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">71.4</text><text x="361" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/11</text>
+      <rect x="403" y="125.4" width="48" height="194.6" rx="3" fill="#378ADD"/><text x="427" y="119.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">73.0</text><text x="427" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">25/12</text>
+      <rect x="469" y="126.8" width="48" height="193.2" rx="3" fill="#378ADD"/><text x="493" y="120.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">72.4</text><text x="493" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/01</text>
+      <rect x="535" y="141.3" width="48" height="178.7" rx="3" fill="#378ADD"/><text x="559" y="135.3" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">67.0</text><text x="559" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/02</text>
+      <rect x="601" y="123.4" width="48" height="196.6" rx="3" fill="#378ADD"/><text x="625" y="117.4" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">73.7</text><text x="625" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/03</text>
+      <rect x="667" y="118.0" width="48" height="202.0" rx="3" fill="#378ADD"/><text x="691" y="112.0" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">75.8</text><text x="691" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/04</text>
+      <rect x="733" y="108.8" width="48" height="211.2" rx="3" fill="#378ADD"/><text x="757" y="102.8" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">79.2</text><text x="757" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/05</text>
+      <rect x="799" y="117.5" width="48" height="202.5" rx="3" fill="#378ADD"/><text x="823" y="111.5" text-anchor="middle" font-size="11" fill="#E7ECEF" font-weight="700">75.9</text><text x="823" y="340" text-anchor="middle" font-size="10" fill="#8B93A0">26/06</text>
+      <rect x="865" y="99.4" width="48" height="220.6" rx="3" fill="#EDA100"/><text x="889" y="93" text-anchor="middle" font-size="12" fill="#FBBF24" font-weight="700">82.7</text><text x="889" y="340" text-anchor="middle" font-size="10" fill="#8B93A0" font-weight="700">26/07</text>
+    </svg>
+    <div style="text-align:center;font-size:12px;color:var(--ink-mute);margin-top:.3rem;">單位:億元　橘色=近13期新高　粉色=近13期低點</div>
+  </div>
+  <table>
+    <thead><tr><th>月份</th><th>25/07</th><th>25/08</th><th>25/09</th><th>25/10</th><th>25/11</th><th>25/12</th><th>26/01</th><th>26/02</th><th>26/03</th><th>26/04</th><th>26/05</th><th>26/06</th><th>26/07</th></tr></thead>
+    <tbody><tr><td class="label">年增%</td><td class="trough">+2.0%</td><td>+8.7%</td><td>+17.4%</td><td>+20.2%</td><td>+25.1%</td><td>+30.5%</td><td>+43.0%</td><td>+34.6%</td><td>+35.2%</td><td>+32.5%</td><td>+30.2%</td><td>+21.2%</td><td class="peak">+29.4%</td></tr></tbody>
+  </table>
+  <p class="snap-note">資料來源:Yahoo股市-力成營收表、財報狗、Yahoo股市公告(查詢時間2026/8/13;2026/3、6、7月為依季度/半年度累計數字推算,已交叉驗證一致)</p>
+  <p>年增率從2025年7月的+1.96%,一路墊高到2026年1月的+43.04%,呈現典型的「基期轉換」效應。2026年2月的回落屬農曆年季節性因素,並非動能轉弱,3月起立即恢復成長動能。目前這波成長主要仍來自記憶體市場復甦與既有封測業務稼動率提升,FOPLP/CPO先進封裝的營收貢獻,依法說會時程要到2026下半年客戶認證、2027年中前量產,現階段成長主要仍是循環性復甦,尚未進入結構性成長的驗證階段。</p>
+</section>
+
+<section id="step5">
+  <div class="step-eyebrow">第 5 步 / 共 6 步</div>
+  <h2>前瞻本益比 / EPS 預估</h2>
+  <div class="callout">法人預估持續上修——從2025年10月的「2026年EPS上看10元以上、目標價最高220元」,逐步上修到近期「EPS預估達12.96元、目標價喊到400元」。目前股價285元,對比最新目標價400元仍有約40%潛在漲幅空間,但高度仰賴FOPLP能否如期通過客戶認證。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">法人預估演變軌跡</h3>
+  <p>2025年10月(Q3財報後):法人對2026年展望普遍樂觀,目標價預估最高達220元,多家機構預估2026年EPS挑戰10元以上,2026年資本支出計畫400億元。近期最新預估(較樂觀):市場已將目標價喊到400元、EPS預估達12.96元,AMD的EFB技術導入力成2.5D面板級先進封裝進行核心CPU驗證,顯示技術規格已獲Tier-1客戶認可。FOPLP良率已達94-95%,下半年啟動產品認證,預計2027年進入大規模量產。</p>
+  <p class="snap-note">資料來源:CMoney、CMoney Readmo</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">前瞻本益比</h3>
+  <table>
+    <thead><tr><th>基準</th><th>預估EPS</th><th>前瞻本益比(現價285元)</th></tr></thead>
+    <tbody>
+      <tr><td class="label">2026年(較樂觀新預估)</td><td>12.96元</td><td><b>約22.0倍</b></td></tr>
+      <tr><td class="label">2026年(較保守舊預估,2025/10)</td><td>~10.9元</td><td><b>約26.1倍</b></td></tr>
+    </tbody>
+  </table>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">目標本益比法試算(2026年EPS 12.96元)</h3>
+  <table>
+    <thead><tr><th>假設本益比</th><th>目標價</th></tr></thead>
+    <tbody>
+      <tr><td class="label">20倍(保守)</td><td>259.2元</td></tr>
+      <tr><td class="label">25倍(中性)</td><td>324元</td></tr>
+      <tr><td class="label">30倍(樂觀,接近400元目標價隱含倍數)</td><td>388.8元</td></tr>
+    </tbody>
+  </table>
+  <div class="callout danger">
+    <b>不確定性揭露</b>:2025年10月喊出的目標價上限220元已被目前股價285元超越,新一輪法人預估則進一步上修到400元、EPS 12.96元,顯示法人樂觀程度持續增強。這個評價的可信度高度取決於多空論戰能否往樂觀方向收斂:若FOPLP良率順利在2026下半年通過客戶認證且訂單落地,400元目標價的22倍前瞻本益比並不誇張;但若記憶體循環反轉向下或FOPLP認證延誤,股價可能面臨循環股估值的重新定價壓力,回落到更保守的15-20倍區間。
+  </div>
+</section>
+
+<section id="step6">
+  <div class="step-eyebrow">第 6 步 / 共 6 步</div>
+  <h2>投資決策推理</h2>
+  <div class="callout warn"><b>聲明</b>:以下是基於前五步分析的推理與觀點,不是專業投資顧問或理財顧問的正式建議,實際交易決策請自行判斷或諮詢合格的財務顧問。</div>
+  <div class="callout"><b>核心切入點</b>:力成呈現「雙重身份疊加」的獨特情境——現金流體質是分析過的所有案例中最扎實的之一(規則五98分,10年零失誤),同時又是一家正在經歷「傳統記憶體封測循環股」轉型為「AI先進封裝結構性成長股」的公司。</div>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若尚未持有,會不會進場?</h3>
+  <p>會考慮分批進場。現金流品質是最令人放心的一環,即便2025年出現史上最大投資支出與現金餘額下滑,獲利含金量從未受到質疑。FOPLP故事的可驗證性優於多數同類敘事——具體的良率數字、明確的客戶名稱、清楚的量產時程,大幅降低了故事純屬想像的風險。但記憶體循環風險真實存在,目前22-26倍的前瞻本益比同時反映了循環復甦與FOPLP成功兩個樂觀假設。分批進場的邏輯在於:先參與已相對確定的記憶體循環復甦動能,同時保留加碼空間等待FOPLP認證結果進一步明朗。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">若已持有,會續抱還是賣出?</h3>
+  <p>傾向續抱,這是現金流體質最讓人安心續抱的一次。規則五的完美表現加上規則四也有75分水準,顯示財務操作相對透明合理。月營收動能已連續驗證(11個月成長、創40個月新高),基本面確實在改善。唯一需要提高警覺的情況是:若2026下半年FOPLP客戶認證結果不如預期,或記憶體循環出現超預期的提前反轉,屆時需重新評估部位大小。</p>
+  <h3 style="font-size:16px;margin:1.2rem 0 .4rem;">具體可驗證的觀察訊號</h3>
+  <table class="signal-table">
+    <thead><tr><th style="text-align:left;">訊號</th><th>觀察時點</th><th style="text-align:left;">判讀方式</th></tr></thead>
+    <tbody>
+      <tr><td class="label">FOPLP良率(94-95%)是否順利通過AMD/博通客戶認證</td><td>2026下半年</td><td class="label">若順利通過,支持2027年中量產目標;若卡關延誤,需重新評估目標價合理性</td></tr>
+      <tr><td class="label">博通新加坡合資公司(4億美元)是否如期取得核准並啟動建置</td><td>依公司公告</td><td class="label">核准進度與建置時程是驗證策略投資能否落地的關鍵</td></tr>
+      <tr><td class="label">CPO光引擎是否如期於2026年底小量出貨</td><td>2026年底</td><td class="label">若如期出貨,是躍升CPO供應鏈的重要里程碑;若延遲,需重新檢視2028年量產時程</td></tr>
+      <tr><td class="label">記憶體現貨與合約價走勢,是否出現循環反轉訊號</td><td>持續關注</td><td class="label">記憶體佔營收46%,循環反轉會直接衝擊獲利</td></tr>
+      <tr><td class="label">2027年400億資本支出執行進度與折舊費用變化</td><td>每季財報</td><td class="label">折舊費用若壓縮毛利率,需重新評估擴產效益</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer>
+  <p>報告版本 v1.0　生成時間 2026-08-13　依「台股個股初步分析六步驟流程」框架產出</p>
+  <p style="margin-top:.3rem;">資料來源標註於各步驟內,現金流量表原始數據由使用者提供截圖,其餘數據為對話當下搜尋所得,僅供參考,不構成投資建議。</p>
+</footer>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stepnav a'));
+  links.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = document.getElementById(link.getAttribute('href').substring(1));
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+  var sections = links.map(function(link){ return document.getElementById(link.getAttribute('href').substring(1)); }).filter(Boolean);
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+  sections.forEach(function(s){ observer.observe(s); });
+})();
+</script>
+
+</body>
+</html>
